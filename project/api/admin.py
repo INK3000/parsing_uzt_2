@@ -1,6 +1,6 @@
-from api.models import Category_of_job, Job, Tg_User
+from .models import CategoryOfJob, Job, TgUser
 from django.contrib import admin
 
-admin.site.register(Tg_User)
+admin.site.register(TgUser)
 admin.site.register(Job)
-admin.site.register(Category_of_job)
+admin.site.register(CategoryOfJob)

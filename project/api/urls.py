@@ -1,7 +1,8 @@
+from . import views
 from django.urls import path
 
-from . import views
-
 urlpatterns = [
-    path("", views.hello_world),
+    path("categories", views.CategoriesList.as_view()),
+    path("jobs", views.JobList.as_view()),
+    path("users", views.TgUserList.as_view()),
 ]
