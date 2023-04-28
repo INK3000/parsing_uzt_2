@@ -1,0 +1,6 @@
+site_name: Parsing portal.uzt.lt
+nav:
+  - Home: index.md
+  - About: about.md
+  - Todo: todo.md
+theme: readthedocs
