@@ -3,7 +3,7 @@ from django.db import models
 
 class TgUser(models.Model):
     telegram_id = models.CharField(max_length=12)
-    subscriptions = models.TextField()
+    subscriptions = models.TextField(blank=True)
 
     class Meta:
         ordering = ["-id"]
@@ -11,11 +11,11 @@ class TgUser(models.Model):
 
 class CategoryOfJob(models.Model):
     name = models.CharField(max_length=255)
-    event_target = models.CharField(max_length=255)
-    last_id = models.IntegerField()
+    event_target = models.CharField(max_length=255, unique=True)
+    last_id = models.IntegerField(null=True)
 
     class Meta:
-        ordering = ["-id"]
+        ordering = ["id"]
 
     def __str__(self):
         return f"{self.name}"
@@ -33,6 +33,7 @@ class Job(models.Model):
 
     class Meta:
         ordering = ["-id"]
+        unique_together = ["category", "url"]
 
     def __str__(self):
         return f"{self.name} - {self.company} - {self.category.name}"

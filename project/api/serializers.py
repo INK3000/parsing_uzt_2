@@ -1,5 +1,8 @@
-from .models import CategoryOfJob, Job, TgUser
 from rest_framework import serializers
+
+from .models import CategoryOfJob, Job, TgUser
+
+# Telegram users
 
 
 class TgUserSerializer(serializers.ModelSerializer):
@@ -8,13 +11,24 @@ class TgUserSerializer(serializers.ModelSerializer):
         fields = ["id", "telegram_id", "subscriptions"]
 
 
-class CategoryOfJobSerializer(serializers.ModelSerializer):
+# Category of jobs
+
+
+class CategoryOfJobCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CategoryOfJob
-        fields = ["name", "event_target", "last_id"]
+        fields = ["id", "name", "event_target", "last_id"]
 
 
-class JobSerializer(serializers.ModelSerializer):
+class CategoryOfJobUpdateSerializer(serializers.ModelSerializer):
+    class Meta(CategoryOfJobCreateSerializer.Meta):
+        read_only_fields = ["id", "name", "event_target"]
+
+
+# Jobs
+
+
+class JobCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = [
