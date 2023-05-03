@@ -2,5 +2,7 @@ site_name: Parsing portal.uzt.lt
 nav:
   - Home: index.md
   - About: about.md
+  - Roadmap: roadmap.md
   - Todo: todo.md
+  - Dependencies: depend.md
 theme: readthedocs

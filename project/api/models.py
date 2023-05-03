@@ -1,21 +1,22 @@
 from django.db import models
 
 
-class TgUser(models.Model):
+class Subscribers(models.Model):
     telegram_id = models.CharField(max_length=12)
-    subscriptions = models.TextField(blank=True)
+    subscribed_to = models.TextField(default="", blank=True)
 
     class Meta:
         ordering = ["-id"]
 
 
-class CategoryOfJob(models.Model):
+class Category(models.Model):
     name = models.CharField(max_length=255)
     event_target = models.CharField(max_length=255, unique=True)
     last_id = models.IntegerField(null=True)
 
     class Meta:
         ordering = ["id"]
+        verbose_name = "Category"
 
     def __str__(self):
         return f"{self.name}"
@@ -24,7 +25,8 @@ class CategoryOfJob(models.Model):
 class Job(models.Model):
     date_upd = models.DateField(auto_now_add=True)
     name = models.TextField()
-    category = models.ForeignKey(CategoryOfJob, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True)
     company = models.CharField(max_length=255)
     date_from = models.DateField()
     date_to = models.DateField()
@@ -33,7 +35,10 @@ class Job(models.Model):
 
     class Meta:
         ordering = ["-id"]
-        unique_together = ["category", "url"]
+        constraints = [
+            models.UniqueConstraint(
+                name="category_url", fields=["category", "url"])
+        ]
 
     def __str__(self):
-        return f"{self.name} - {self.company} - {self.category.name}"
+        return f"id:{self.id} {self.name} - {self.company} - {self.category.name}"
