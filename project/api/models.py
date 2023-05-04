@@ -1,12 +1,15 @@
 from django.db import models
 
 
-class Subscribers(models.Model):
-    telegram_id = models.CharField(max_length=12)
+class Subscriber(models.Model):
+    telegram_id = models.IntegerField(unique=True)
     subscribed_to = models.TextField(default="", blank=True)
 
     class Meta:
         ordering = ["-id"]
+
+    def __str__(self):
+        return str(self.telegram_id)
 
 
 class Category(models.Model):
@@ -15,7 +18,7 @@ class Category(models.Model):
     last_id = models.IntegerField(null=True)
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["-id"]
         verbose_name = "Category"
 
     def __str__(self):
@@ -42,3 +45,9 @@ class Job(models.Model):
 
     def __str__(self):
         return f"id:{self.id} {self.name} - {self.company} - {self.category.name}"
+
+    def __eq__(self, other):
+        return self.category == other.category and self.url == other.url
+
+    def __hash__(self):
+        return hash((self.category, self.url))
