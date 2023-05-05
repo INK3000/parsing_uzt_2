@@ -3,13 +3,18 @@
 ### API service
 
 - endpoints for manage category +
-- endpoints for manage subscriber +
+- endpoints for manage subscriber (fix: change id to telegram_id) +
 - endpoints for manage category/{category_id}/jobs/create +
 - manage bulk_creation for categories +
-- **decide how manage subscribtions for user (json or relation)**
+- manage docs for API on Home page +
 
-> 1\. see how the tags are made in the course, and make similar subscriptions to categories. to do this, you need to create another many-to-many model.
->
-> 2\. or make subscriptions in json format.
->
-> **I have to think which way is more optimized.**
+### Webscraping service
+
+**refactor to property
+def get_asp_form_onsubmit_url(self):**
+
+- opening https://portal.uzt.lt/LDBPortal/Pages/ServicesForEmployees.aspx should not cause errors
+
+> I need to solve headers problem
+
+> it's necessary to generate the headers automatically

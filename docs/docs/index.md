@@ -1,11 +1,22 @@
 # Welcome to project "Parsing portal.uzt.lt"
 
-### api documentation
+## API service
 
-- `api/docs`
+Full API sevice documentations /api/docs
 
-### endpoints
+#### Category
 
-- `/api/categories`
-- `/api/category/update`
-- `/api/category/create`
+- GET: /api/categories
+- POST: /api/categories/create
+- PUT: /api/category/update
+
+#### Job
+
+- GET: /api/category/{category_id}/jobs
+- POST: /api/category/{category_id}/jobs/create
+
+#### Subscriber
+
+- GET: /api/subscribers
+- POST: /api/subscriber/create
+- PUT: /api/subscriber/update

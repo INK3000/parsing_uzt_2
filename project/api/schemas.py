@@ -1,3 +1,5 @@
+from typing import Any
+
 from ninja import ModelSchema, Schema
 
 from . import models
@@ -22,21 +24,20 @@ class CategoryIn(ModelSchema):
 
 
 # schemas for Subscribers
+class SubscribedTo(Schema):
+    subscribed_to: list[dict[int, int]]
+
+
 class SubscriberOut(ModelSchema):
     class Config:
         model = models.Subscriber
         model_fields = "__all__"
 
 
-class SubscriberUpdate(Schema):
-    id: int
-    subscribed_to: str
-
-
 class SubscriberIn(ModelSchema):
     class Config:
         model = models.Subscriber
-        model_exclude = ["id"]
+        model_exclude = ["date_created"]
 
 
 # schema for some errors output

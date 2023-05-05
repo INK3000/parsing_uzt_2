@@ -34,35 +34,8 @@ def category_update(request, payload: scm.CategoryUpdate):
     return category
 
 
-# Manage Subscribers **************************************
-@api.get("/subscribers", response=list[scm.SubscriberOut])
-def subscribers_list(request):
-    queryset = models.Subscriber.objects.all()
-    return list(queryset)
-
-
-@api.post("/subscriber/create", response={201: scm.SubscriberOut, 409: scm.Error})
-def subscriber_create(request, payload: scm.SubscriberIn):
-    subscriber = models.Subscriber(**payload.dict())
-    try:
-        subscriber.save()
-        return 201, subscriber
-    except IntegrityError as err:
-        return 409, {"detail": f"{err}"}
-
-
-@api.put("/subscriber/update", response=scm.SubscriberOut)
-def subscriber_update(request, payload: scm.SubscriberUpdate):
-    subscriber = get_object_or_404(
-        models.Subscriber, id=payload.dict().get("id"))
-    for attr, value in payload.dict().items():
-        setattr(subscriber, attr, value)
-    subscriber.save()
-    return subscriber
-
-
 # Manage Jobs **************************************
-@api.get("categories/{category_id}/jobs", response=list[scm.JobOut])
+@api.get("category/{category_id}/jobs", response=list[scm.JobOut])
 def jobs_by_category(request, category_id: int):
     queryset_list = get_list_or_404(models.Job, category=category_id)
     return queryset_list
@@ -82,3 +55,29 @@ def jobs_bulk_create(request, category_id: int, payload: list[scm.JobIn]):
         return 201, created_jobs
     else:
         return 409, {"detail": "There were no new data in this category"}
+
+
+# Manage Subscribers **************************************
+@api.get("/subscribers", response=list[scm.SubscriberOut])
+def subscribers_list(request):
+    queryset = models.Subscriber.objects.all()
+    return list(queryset)
+
+
+@api.post("/subscriber/create", response={201: scm.SubscriberOut, 409: scm.Error})
+def subscriber_create(request, payload: scm.SubscriberIn):
+    subscriber = models.Subscriber(**payload.dict())
+    try:
+        subscriber.save()
+        return 201, subscriber
+    except IntegrityError as err:
+        return 409, {"detail": f"{err}"}
+
+
+@api.put("/subscriber/update", response=scm.SubscriberOut)
+def subscriber_update(request, payload: scm.SubscriberIn):
+    subscriber = get_object_or_404(
+        models.Subscriber, telegram_id=payload.telegram_id)
+    subscriber.data = payload.data
+    subscriber.save()
+    return subscriber

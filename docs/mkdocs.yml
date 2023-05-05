@@ -1,4 +1,5 @@
 site_name: Parsing portal.uzt.lt
+dev_addr: 127.0.0.1:8001
 nav:
   - Home: index.md
   - About: about.md

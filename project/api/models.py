@@ -2,11 +2,12 @@ from django.db import models
 
 
 class Subscriber(models.Model):
-    telegram_id = models.IntegerField(unique=True)
-    subscribed_to = models.TextField(default="", blank=True)
+    telegram_id = models.PositiveIntegerField(primary_key=True)
+    date_created = models.DateField(auto_now_add=True)
+    json_data = models.TextField(default="", blank=True)
 
     class Meta:
-        ordering = ["-id"]
+        ordering = ["-date_created"]
 
     def __str__(self):
         return str(self.telegram_id)
