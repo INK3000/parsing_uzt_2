@@ -10,11 +10,6 @@
 
 ### Webscraping service
 
-**refactor to property
-def get_asp_form_onsubmit_url(self):**
-
-- opening https://portal.uzt.lt/LDBPortal/Pages/ServicesForEmployees.aspx should not cause errors
-
-> I need to solve headers problem
-
-> it's necessary to generate the headers automatically
+- UZTScraper class +
+- **Algorithm for webscraper (open startpage, get categories, walk all categories,
+  scrap all pages, send data in every category to API for saving)**
