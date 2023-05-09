@@ -25,9 +25,9 @@ def category_create(request, payload: list[scm.CategoryIn]):
         return 409, {"detail": f"{err}"}
 
 
-@api.put("/category/update", response=scm.CategoryOut)
-def category_update(request, payload: scm.CategoryUpdate):
-    category = get_object_or_404(models.Category, id=payload.dict().get("id"))
+@api.post("/category/{category_id}/update", response=scm.CategoryOut)
+def category_update(request, category_id: int, payload: scm.CategoryUpdate):
+    category = get_object_or_404(models.Category, id=category_id)
     for attr, value in payload.dict().items():
         setattr(category, attr, value)
     category.save()
@@ -35,26 +35,27 @@ def category_update(request, payload: scm.CategoryUpdate):
 
 
 # Manage Jobs **************************************
-@api.get("category/{category_id}/jobs", response=list[scm.JobOut])
-def jobs_by_category(request, category_id: int):
-    queryset_list = get_list_or_404(models.Job, category=category_id)
-    return queryset_list
-
-
 @api.post(
     "category/{category_id}/jobs/create",
     response={201: list[scm.JobOut], 409: scm.Error},
 )
 def jobs_bulk_create(request, category_id: int, payload: list[scm.JobIn]):
-    exist_set = set(get_list_or_404(models.Job, category=category_id))
+    exist_set = set(models.Job.objects.all().filter(category=category_id))
     bulk_set = {models.Job(category_id=category_id, **item.dict())
                 for item in payload}
     only_new_set = bulk_set.difference(exist_set)
-    if only_new_set:
-        created_jobs = models.Job.objects.bulk_create(only_new_set)
+    created_jobs = models.Job.objects.bulk_create(only_new_set)
+    if created_jobs:
+        created_jobs.sort(key=lambda item: item.id, reverse=True)
         return 201, created_jobs
     else:
-        return 409, {"detail": "There were no new data in this category"}
+        return 409, {"detail": "There were no new data for this category"}
+
+
+@api.get("category/{category_id}/jobs", response=list[scm.JobOut])
+def jobs_by_category(request, category_id: int):
+    queryset_list = get_list_or_404(models.Job, category=category_id)
+    return queryset_list
 
 
 # Manage Subscribers **************************************
@@ -74,7 +75,7 @@ def subscriber_create(request, payload: scm.SubscriberIn):
         return 409, {"detail": f"{err}"}
 
 
-@api.put("/subscriber/update", response=scm.SubscriberOut)
+@api.post("/subscriber/update", response=scm.SubscriberOut)
 def subscriber_update(request, payload: scm.SubscriberIn):
     subscriber = get_object_or_404(
         models.Subscriber, telegram_id=payload.telegram_id)

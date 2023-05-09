@@ -2,4 +2,6 @@
 .venv
 .idea
 __pycache__
+.ipynb_checkpoints
+*.html
 db.sqlite3

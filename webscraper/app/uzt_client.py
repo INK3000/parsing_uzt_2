@@ -45,25 +45,38 @@ class UZTClient(httpx.Client):
             )
             super().__init__(self.message)
 
+    class AspInputsError(Exception):
+        def __iniy__(self):
+            self.message = "It is not possible to get asp_form_inputs."
+            super().__init__(self.message)
+
     # Scraper class's methods and properties
     def __init__(self, *args, **kwargs):
         self.response: httpx.Response | None = None
+        self.redirect_response: httpx.Response | None = None
         self._asp_form_inputs: dict | None = None
-        self._next_url = ""
-        # kwargs["proxies"] = "https://89.43.31.134:3128"
+        self.only_url = False
+        # kwargs["proxies"] = "http://37.27.3.22:8080"
         kwargs["headers"] = self.load_headers(settings.HEADERS_PATH)
         super().__init__(*args, **kwargs)
 
     def get(self, *args, **kwargs):
         self.response = super().get(*args, **kwargs)
         self._asp_form_inputs = None
+        self.redirect_response = None
         return self.response
 
-    def submit_asp_form(self, href):
+    def submit_asp_form(self, href, only_url=False):
+        self.only_url = only_url
         data = self.prepare_form_data(href)
-        self.response = super().post(url=str(self.response.url), data=data)
-        self._asp_form_inputs = None
-        return self.response
+        response = super().post(url=str(self.response.url), data=data)
+        if "pageRedirect" in response.text:
+            self.redirect_response = response
+        else:
+            self.response = response
+            self.redirect_response = None
+            self._asp_form_inputs = None
+        return response
 
     def prepare_form_data(self, href):
         event_target = self.get_event_target(href)
@@ -93,7 +106,7 @@ class UZTClient(httpx.Client):
 
     @property
     def _has_response(self):
-        if not self.response:
+        if not (self.response or self.redirect_response):
             raise UZTClient.PropertyError
 
     @property
@@ -109,29 +122,32 @@ class UZTClient(httpx.Client):
                 if node.attrs.get("name").startswith("__")
             }
         else:
-            need_to_get = ("__VIEWSTATE", "__VIEWSTATEGENERATOR", "__EVENTVALIDATION")
-            splited_text = self.text.split("|")
-            self._asp_form_inputs = {
-                item: splited_text[splited_text.index(item) + 1] for item in need_to_get
-            }
+            try:
+                need_to_get = (
+                    "__VIEWSTATE",
+                    "__VIEWSTATEGENERATOR",
+                    "__EVENTVALIDATION",
+                )
+                splited_text = self.text.split("|")
+                self._asp_form_inputs = {
+                    item: splited_text[splited_text.index(item) + 1]
+                    for item in need_to_get
+                }
+            except Exception:
+                raise UZTClient.AspInputsError
         return self._asp_form_inputs
 
     @property
-    def is_redirect(self):
-        self._has_response
-        return "pageRedirect" in self.response.text
-
-    @property
     def next_url(self):
-        if not self.is_redirect:
+        if not self.redirect_response:
             return False
-        text = self.response.text
+        text = self.redirect_response.text
         pattern = re.compile(r"([^\|]+)\|$")
         match = pattern.search(text)
         if match:
             right_url = url_unquote(match.group(1))
-            self._next_url = f"{settings.BASE_URL}/{right_url}"
-            return self._next_url
+            next_url = f"{settings.BASE_URL}/{right_url}"
+            return next_url
         return False
 
     @property
@@ -142,7 +158,8 @@ class UZTClient(httpx.Client):
         make sure to call this method only after retrieving the next URL.
         """
         self._has_response
-        if self.response.text and "pageRedirect" in self.response.text:
+
+        if self.redirect_response and not self.only_url:
             self.get(self.next_url)
 
         return self.response.text

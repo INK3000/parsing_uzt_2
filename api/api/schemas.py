@@ -13,7 +13,6 @@ class CategoryOut(ModelSchema):
 
 
 class CategoryUpdate(Schema):
-    id: int
     last_id: int
 
 

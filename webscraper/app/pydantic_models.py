@@ -4,19 +4,20 @@ from pydantic import BaseModel
 
 
 class FResp(BaseModel):
-    status_ok: bool = False
+    ok: bool = False
     data: Any = ""
 
     def __bool__(self):
-        return self.status_ok
+        return self.ok
 
 
 class Job(BaseModel):
-    date1: str
-    date2: str
+    date_from: str
+    date_to: str
     title: str
     company: str
     place: str
+    url: str
 
 
 class CategoryIn(BaseModel):
