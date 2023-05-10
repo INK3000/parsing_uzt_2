@@ -106,8 +106,7 @@ def get_jobs(category: pd.CategoryIn):
 
         next_page = get_next_page_href(uzt)
         while next_page:
-            table = uzt.tree.css_first(
-                "#ctl00_MainArea_SearchResultsList_POGrid")
+            table = uzt.tree.css_first("#ctl00_MainArea_SearchResultsList_POGrid")
             tr_list = table.css("tr:not(:nth-child(-n+2)):not(:last-child)")
             for tr in tr_list:
                 cells = tr.css("td")
@@ -166,6 +165,9 @@ def main():
                     log_info("No new data was saved")
     except (UZTClient.AspInputsError, httpx.ConnectError) as e:
         log_info(f"ERROR --- {e}")
+    log_info(
+        "Mission accomplished! Now I can have some fun, or rather, I'm going to sleep..."
+    )
 
 
 if __name__ == "__main__":

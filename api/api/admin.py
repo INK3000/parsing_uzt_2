@@ -38,8 +38,9 @@ class JobAdmin(admin.ModelAdmin):
 
 class SubscriberAdmin(admin.ModelAdmin):
     list_display = ["telegram_id", "date_created"]
-    readonly_fields = ["date_created"]
-    filter_horizontal = ["subscriptions"]
+    fields = ["telegram_id", "subscriptions", "date_created"]
+    readonly_fields = ["telegram_id", "date_created", "subscriptions"]
+    # filter_horizontal = ["subscriptions"]
 
 
 admin.site.register(models.Subscriber, SubscriberAdmin)
