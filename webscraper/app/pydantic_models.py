@@ -24,7 +24,7 @@ class CategoryIn(BaseModel):
     id: int
     name: str
     href: str
-    last_id: int | None
+    last_upd_id: int | None
 
 
 class CategoryOut(BaseModel):

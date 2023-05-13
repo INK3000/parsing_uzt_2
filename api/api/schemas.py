@@ -13,30 +13,33 @@ class CategoryOut(ModelSchema):
 
 
 class CategoryUpdate(Schema):
-    last_id: int
+    last_upd_id: int
 
 
 class CategoryIn(ModelSchema):
     class Config:
         model = models.Category
-        model_exclude = ["id", "last_id"]
+        model_exclude = ["id", "last_upd_id"]
 
 
 # schemas for Subscribers
 class SubscribedTo(Schema):
-    subscribed_to: list[dict[int, int]]
+    category_id: int
+    last_upd_id: int
 
 
 class SubscriberOut(ModelSchema):
+    subscriptions: list[SubscribedTo] | None
+
     class Config:
         model = models.Subscriber
-        model_fields = "__all__"
+        model_exclude = ["subscribed_to"]
 
 
 class SubscriberIn(ModelSchema):
     class Config:
         model = models.Subscriber
-        model_exclude = ["date_created"]
+        model_exclude = ["id", "date_created", "subscribed_to"]
 
 
 # schema for some errors output

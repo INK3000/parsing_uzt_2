@@ -62,10 +62,15 @@ def jobs_by_category(request, category_id: int):
 @api.get("/subscribers", response=list[scm.SubscriberOut])
 def subscribers_list(request):
     queryset = models.Subscriber.objects.all()
-    return list(queryset)
+    for subscriber in queryset:
+        subscriber.subscriptions = models.Subscription.objects.all().filter(
+            subscriber_id=subscriber.telegram_id
+        )
+
+    return queryset
 
 
-@api.post("/subscriber/create", response={201: scm.SubscriberOut, 409: scm.Error})
+@api.post("/subscriber/create", response={201: scm.SubscriberIn, 409: scm.Error})
 def subscriber_create(request, payload: scm.SubscriberIn):
     subscriber = models.Subscriber(**payload.dict())
     try:
@@ -75,10 +80,20 @@ def subscriber_create(request, payload: scm.SubscriberIn):
         return 409, {"detail": f"{err}"}
 
 
-@api.post("/subscriber/update", response=scm.SubscriberOut)
-def subscriber_update(request, payload: scm.SubscriberIn):
-    subscriber = get_object_or_404(
-        models.Subscriber, telegram_id=payload.telegram_id)
-    subscriber.data = payload.data
-    subscriber.save()
+@api.get("/subscriber/{telegram_id}", response=scm.SubscriberOut)
+def subscriber(request, telegram_id: int):
+    subscriber = get_object_or_404(models.Subscriber, telegram_id=telegram_id)
+    subscriber.subscriptions = models.Subscription.objects.all().filter(
+        subscriber_id=subscriber.id
+    )
+
     return subscriber
+
+
+# @api.post("/subscriber/update", response=scm.SubscriberOut)
+# def subscriber_update(request, payload: scm.SubscriberIn):
+#     subscriber = get_object_or_404(
+#         models.Subscriber, telegram_id=payload.telegram_id)
+#     subscriber.data = payload.data
+#     subscriber.save()
+#     return subscriber

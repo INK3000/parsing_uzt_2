@@ -106,7 +106,8 @@ def get_jobs(category: pd.CategoryIn):
 
         next_page = get_next_page_href(uzt)
         while next_page:
-            table = uzt.tree.css_first("#ctl00_MainArea_SearchResultsList_POGrid")
+            table = uzt.tree.css_first(
+                "#ctl00_MainArea_SearchResultsList_POGrid")
             tr_list = table.css("tr:not(:nth-child(-n+2)):not(:last-child)")
             for tr in tr_list:
                 cells = tr.css("td")
@@ -140,6 +141,11 @@ def get_jobs(category: pd.CategoryIn):
 def main():
     try:
         categories = get_categories()
+    except httpx.ConnectError:
+        log_info("No API cconnection.")
+        exit()
+
+    try:
         for category in categories:
             jobs_list: pd.FResp = get_jobs(category)
             if jobs_list:
@@ -153,10 +159,9 @@ def main():
 
                 if resp and resp.data.status_code == 201:
                     created_jobs = resp.data.json()
-                    category.last_id = created_jobs[0].get("id")
+                    category.last_upd_id = created_jobs[0].get("id")
                     total = len(created_jobs)
                     log_info(f"{total} new jobs were saved")
-
                     send_data_to_api(
                         f"/api/category/{category.id}/update", category.dict()
                     )

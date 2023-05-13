@@ -8,7 +8,7 @@ Full API sevice documentations /api/docs
 
 - GET: /api/categories
 - POST: /api/categories/create
-- PUT: /api/category/update
+- POST: /api/category/update
 
 #### Job
 
@@ -18,5 +18,6 @@ Full API sevice documentations /api/docs
 #### Subscriber
 
 - GET: /api/subscribers
+- GET: /api/subscriber/{telegram_id}
 - POST: /api/subscriber/create
-- PUT: /api/subscriber/update
+- POST: /api/subscriber/update
