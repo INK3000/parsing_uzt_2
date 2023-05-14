@@ -5,6 +5,13 @@ from django.utils.html import format_html
 from . import models
 
 
+class SubscriberAdmin(admin.ModelAdmin):
+    list_display = ["telegram_id", "date_created"]
+    fields = ["telegram_id", "date_created", "subscribed_to"]
+    readonly_fields = ["telegram_id", "date_created", "subscribed_to"]
+    # filter_horizontal = ["subscriptions"]
+
+
 class JobAdmin(admin.ModelAdmin):
     list_display = ["id", "link_title",
                     "company_short", "category", "link_out"]
@@ -36,13 +43,10 @@ class JobAdmin(admin.ModelAdmin):
     link_out.short_description = "Url"
 
 
-class SubscriberAdmin(admin.ModelAdmin):
-    list_display = ["telegram_id", "date_created"]
-    fields = ["telegram_id", "subscribed_to", "date_created"]
-    readonly_fields = ["telegram_id", "date_created", "subscribed_to"]
-    # filter_horizontal = ["subscriptions"]
+class CategoryAdmin(admin.ModelAdmin):
+    readonly_fields = ["name", "href"]
 
 
 admin.site.register(models.Subscriber, SubscriberAdmin)
 admin.site.register(models.Job, JobAdmin)
-admin.site.register(models.Category)
+admin.site.register(models.Category, CategoryAdmin)

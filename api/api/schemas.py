@@ -1,3 +1,4 @@
+import datetime
 from typing import Any
 
 from ninja import ModelSchema, Schema
@@ -19,13 +20,13 @@ class CategoryUpdate(Schema):
 class CategoryIn(ModelSchema):
     class Config:
         model = models.Category
-        model_exclude = ["id", "last_upd_id"]
+        model_exclude = ["id"]
 
 
 # schemas for Subscribers
 class SubscribedTo(Schema):
     category_id: int
-    last_upd_id: int
+    date_last_sent: datetime.datetime
 
 
 class SubscriberOut(ModelSchema):
@@ -37,6 +38,14 @@ class SubscriberOut(ModelSchema):
 
 
 class SubscriberIn(ModelSchema):
+    class Config:
+        model = models.Subscriber
+        model_exclude = ["id", "date_created", "subscribed_to"]
+
+
+class SubscriberUpdate(ModelSchema):
+    subscriptions: list[SubscribedTo]
+
     class Config:
         model = models.Subscriber
         model_exclude = ["id", "date_created", "subscribed_to"]
@@ -57,7 +66,7 @@ class JobOut(ModelSchema):
 class JobIn(ModelSchema):
     class Config:
         model = models.Job
-        model_exclude = ["id", "category", "date_upd"]
+        model_exclude = ["id", "category", "date_scraped"]
 
 
 class JobListIn(Schema):

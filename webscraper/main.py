@@ -1,3 +1,4 @@
+import argparse
 import json
 import re
 
@@ -89,6 +90,25 @@ def get_categories() -> list[pd.CategoryIn]:
                     "Failed to retrieve categories neither from the database nor from the page"
                 )
 
+    return get_categories_slice(categories)
+
+
+def get_categories_slice(categories):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--start", type=int, help="From category id...")
+    parser.add_argument("--end", type=int, help="To category id (iclusive)")
+
+    args = parser.parse_args()
+    start = args.start
+    end = args.end
+
+    if start and end:
+        categories = list(
+            filter(lambda item: item.id >= start and item.id <= end, categories)
+        )
+    elif start:
+        categories = list(filter(lambda item: item.id >= start, categories))
+
     assert categories
     return categories
 
@@ -104,8 +124,7 @@ def get_jobs(category: pd.CategoryIn):
         # -------------- log
         log_info(f'{category.id}: "{category.name}" is in working')
 
-        next_page = get_next_page_href(uzt)
-        while next_page:
+        while True:
             table = uzt.tree.css_first(
                 "#ctl00_MainArea_SearchResultsList_POGrid")
             tr_list = table.css("tr:not(:nth-child(-n+2)):not(:last-child)")
@@ -133,8 +152,11 @@ def get_jobs(category: pd.CategoryIn):
 
                 jobs_list.append(job.dict())
 
-            uzt.submit_asp_form(next_page.data)
             next_page = get_next_page_href(uzt)
+            if not next_page:
+                break
+            uzt.submit_asp_form(next_page.data)
+
     return pd.FResp(ok=True, data=jobs_list)
 
 
@@ -144,7 +166,6 @@ def main():
     except httpx.ConnectError:
         log_info("No API cconnection.")
         exit()
-
     try:
         for category in categories:
             jobs_list: pd.FResp = get_jobs(category)
@@ -159,12 +180,8 @@ def main():
 
                 if resp and resp.data.status_code == 201:
                     created_jobs = resp.data.json()
-                    category.last_upd_id = created_jobs[0].get("id")
                     total = len(created_jobs)
                     log_info(f"{total} new jobs were saved")
-                    send_data_to_api(
-                        f"/api/category/{category.id}/update", category.dict()
-                    )
 
                 else:
                     log_info("No new data was saved")

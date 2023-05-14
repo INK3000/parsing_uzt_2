@@ -17,6 +17,7 @@ async def main():
 
     dp.update.middleware.register(GetUsers())
     dp.message.register(commands.cmd_start, Command(commands=["start"]))
+    dp.message.register(commands.cmd_show, Command(commands=["show"]))
 
     await dp.start_polling(bot)
 

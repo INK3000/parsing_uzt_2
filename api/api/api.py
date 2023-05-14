@@ -25,13 +25,15 @@ def category_create(request, payload: list[scm.CategoryIn]):
         return 409, {"detail": f"{err}"}
 
 
-@api.post("/category/{category_id}/update", response=scm.CategoryOut)
-def category_update(request, category_id: int, payload: scm.CategoryUpdate):
-    category = get_object_or_404(models.Category, id=category_id)
-    for attr, value in payload.dict().items():
-        setattr(category, attr, value)
-    category.save()
-    return category
+#
+# @api.post("/category/{category_id}/update", response=scm.CategoryOut)
+# def category_update(request, category_id: int, payload: scm.CategoryUpdate):
+#     category = get_object_or_404(models.Category, id=category_id)
+#     for attr, value in payload.dict().items():
+#         setattr(category, attr, value)
+#     category.save()
+#     return category
+#
 
 
 # Manage Jobs **************************************
@@ -80,20 +82,34 @@ def subscriber_create(request, payload: scm.SubscriberIn):
         return 409, {"detail": f"{err}"}
 
 
-@api.get("/subscriber/{telegram_id}", response=scm.SubscriberOut)
-def subscriber(request, telegram_id: int):
+# @api.get("/subscriber/{telegram_id}", response=scm.SubscriberOut)
+# def subscriber(request, telegram_id: int):
+#     subscriber = get_object_or_404(models.Subscriber, telegram_id=telegram_id)
+#     subscriber.subscriptions = models.Subscription.objects.all().filter(
+#         subscriber_id=subscriber.id
+#     )
+#
+#     return subscriber
+#
+
+
+@api.put("/subscriber/update", response=scm.SubscriberOut)
+def subscriber_update(request, payload: scm.SubscriberUpdate):
+    telegram_id = payload.telegram_id
+
     subscriber = get_object_or_404(models.Subscriber, telegram_id=telegram_id)
+
+    queryset = models.Subscription.objects.all().filter(subscriber_id=subscriber.id)
+
+    queryset.delete()
+
+    print(payload.subscriptions)
+    print(
+        "*" * 20, models.Subscription.objects.all().filter(subscriber_id=subscriber.id)
+    )
+
     subscriber.subscriptions = models.Subscription.objects.all().filter(
         subscriber_id=subscriber.id
     )
 
     return subscriber
-
-
-# @api.post("/subscriber/update", response=scm.SubscriberOut)
-# def subscriber_update(request, payload: scm.SubscriberIn):
-#     subscriber = get_object_or_404(
-#         models.Subscriber, telegram_id=payload.telegram_id)
-#     subscriber.data = payload.data
-#     subscriber.save()
-#     return subscriber

@@ -4,7 +4,6 @@ from django.db import models
 class Category(models.Model):
     name = models.CharField(max_length=255)
     href = models.CharField(max_length=255, unique=True)
-    last_upd_id = models.IntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ["-id"]
@@ -15,9 +14,10 @@ class Category(models.Model):
 
 
 class Job(models.Model):
-    date_upd = models.DateField(auto_now_add=True)
+    date_scraped = models.DateTimeField(auto_now_add=True)
     title = models.TextField()
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True)
     company = models.CharField(max_length=255)
     date_from = models.DateField()
     date_to = models.DateField()
@@ -27,7 +27,8 @@ class Job(models.Model):
     class Meta:
         ordering = ["-id"]
         constraints = [
-            models.UniqueConstraint(name="category_url", fields=["category", "url"])
+            models.UniqueConstraint(
+                name="category_url", fields=["category", "url"])
         ]
 
     def __str__(self):
@@ -55,4 +56,4 @@ class Subscriber(models.Model):
 class Subscription(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     subscriber = models.ForeignKey(Subscriber, on_delete=models.CASCADE)
-    last_upd_id = models.IntegerField()
+    date_last_sent = models.DateTimeField()
