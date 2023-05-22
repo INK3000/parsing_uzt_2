@@ -1,3 +1,4 @@
 httpx==0.24.0
 pydantic==1.10.7
 aiogram==3.0.0b7
+betterlogging==0.2.1

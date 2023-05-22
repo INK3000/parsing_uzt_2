@@ -1,31 +1,33 @@
-import json
 import logging
 from typing import Any
 
 import httpx
 from aiogram import BaseMiddleware
-from app.pyd_models.categories import Category
+
+from telebot.app.pyd_models.categories import Category
+from telebot.app.settings import settings
 
 logger = logging.getLogger(__name__)
-
-HEADERS = {"accept": "application/json"}
 
 
 class GetCategories(BaseMiddleware):
     def __init__(self) -> None:
         super().__init__()
-        self.categories: dict[int, Category] = dict()
+        self.categories: list[Category] = []
 
         def get_categories_from_inner_dict():
             if self.categories:
                 return self.categories
 
         def get_categories_from_api():
-            url = "http://localhost:8000/api/categories"
+            # see .env file for endpoints
+            url = settings.api.categories.get
+            headers = settings.api.headers
             try:
-                response = httpx.get(url=url, headers=HEADERS)
+                assert url
+                response = httpx.get(url=url, headers=headers)
                 if response.status_code == 200:
-                    return {item["id"]: Category(**item) for item in response.json()}
+                    return [Category(**item) for item in response.json()]
             except httpx.ConnectError as e:
                 logger.error(f"Error to connection to {url}")
 
@@ -34,14 +36,12 @@ class GetCategories(BaseMiddleware):
 
     async def __call__(self, handler, event, data: dict[str, Any]):
         categories = None
-
+        data["categories"] = None
         for fn in self.fn_list:
             categories = fn()
             if categories:
+                self.categories = categories
+                data["categories"] = categories
                 break
-
-        if categories:
-            self.categories = categories
-            data["categories"] = categories
 
         return await handler(event, data)

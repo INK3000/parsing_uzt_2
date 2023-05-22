@@ -1,14 +1,13 @@
-import json
 import logging
 from typing import Any
 
 import httpx
 from aiogram import BaseMiddleware
-from app.pyd_models.subscriber import Subscriber
+
+from telebot.app.pyd_models.subscriber import Subscriber
+from telebot.app.settings import settings
 
 logger = logging.getLogger(__name__)
-
-HEADERS = {"accept": "application/json"}
 
 
 class GetUsers(BaseMiddleware):
@@ -20,20 +19,20 @@ class GetUsers(BaseMiddleware):
             return self.subscribers.get(user_id)
 
         def get_subscriber_from_api(user_id):
-            url = f"http://localhost:8000/api/subscriber/{user_id}"
+            # see .env file for endpoints
+            url = settings.api.user.get.format(user_id)
             try:
-                response = httpx.get(url=url, headers=HEADERS)
+                response = httpx.get(url=url)
                 if response.status_code == 200:
                     return Subscriber(**response.json())
             except httpx.ConnectError as e:
                 logger.error(f"Error to connection to {url}")
 
         def create_subscriber_for_api(user_id):
-            url = "http://localhost:8000/api/subscriber/create"
+            # see .env file for endpoints
+            url = settings.api.user.create.format(user_id)
             try:
-                response = httpx.post(
-                    url=url, content=json.dumps({"telegram_id": user_id})
-                )
+                response = httpx.get(url=url)
                 if response.status_code == 201:
                     return Subscriber(**response.json())
                 if response.status_code == 200 and response.json():
@@ -49,16 +48,14 @@ class GetUsers(BaseMiddleware):
 
     async def __call__(self, handler, event, data: dict[str, Any]):
         user_id = data.get("event_from_user").id
-
+        data["subscriber"] = None
         subscriber = self.subscribers.get(user_id)
 
         for fn in self.fn_list:
             subscriber = fn(user_id)
             if subscriber:
+                self.subscribers[user_id] = subscriber
+                data["subscriber"] = subscriber
                 break
-
-        if subscriber:
-            self.subscribers[user_id] = subscriber
-            data["subscriber"] = subscriber
 
         return await handler(event, data)

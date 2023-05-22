@@ -14,5 +14,6 @@
 - Algorithm for webscraper (open startpage, get categories, walk all categories,
   scrap all pages, send data in every category to API for saving) +
 - telebot: - get subscribers and create subscribers +
-- ** API: Update subscriber - last_upd_date**
-- ** API: If the subscriber does not exist during update, create one.**
+- API: Update subscriber - last_upd_date +
+- **telebot: manage subscription: to_add, to_remove**
+- **API:authorisation. create token**

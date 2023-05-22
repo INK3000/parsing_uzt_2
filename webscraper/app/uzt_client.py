@@ -14,8 +14,9 @@ import re
 from urllib.parse import unquote as url_unquote
 
 import httpx
-from app import settings
 from selectolax.lexbor import LexborHTMLParser
+
+from webscraper.app import settings
 
 
 class UZTClient(httpx.Client):
