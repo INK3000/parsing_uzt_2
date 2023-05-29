@@ -1,14 +1,16 @@
-import sys
 import argparse
 import json
 import logging
 import logging.config
 import re
+import sys
+from urllib.parse import urljoin
 
 import httpx
 
+from webscraper.app import custom_exception as ce
 from webscraper.app import pydantic_models as pd
-from webscraper.app import settings
+from webscraper.app.settings import settings
 from webscraper.app.uzt_client import UZTClient
 from webscraper.loggers.settings import settings as logger_settings
 
@@ -16,13 +18,12 @@ logger = logging.getLogger(__name__)
 logging.config.dictConfig(logger_settings)
 
 
-HEADERS = {
-    'accept': 'application/json',
-    'Content-Type': 'application/json',
-}
+def log_error_and_exit(error):
+    logger.error(error)
+    sys.exit()
 
 
-def get_categories_from_page(client: UZTClient) -> pd.FResp:
+def get_categories_from_page(client: UZTClient) -> list[dict]:
     categories = list()
     a_list = client.tree.css('#ctl00_MainArea_UpdatePanel1 li a')
     for a in a_list:
@@ -31,39 +32,37 @@ def get_categories_from_page(client: UZTClient) -> pd.FResp:
         category = pd.CategoryOut(name=name, href=href)
         categories.append(category.dict())
     if not categories:
-        return pd.FResp(data='There are no categories on the page')
-    return pd.FResp(ok=True, data=categories)
+        raise ce.ScrappingError('There are no categories on the page')
+    return categories
 
 
-def send_data_to_api(endpoint: str, data: list[dict] | dict):
-    url = f'{settings.API_BASE_URL}{endpoint}'
-    resp = httpx.post(url=url, headers=HEADERS, content=json.dumps(data))
-    if resp.status_code != 201:
-        return pd.FResp(data=resp)
-    return pd.FResp(ok=True, data=resp)
+def save_data_to_api(endpoint: str, data: list[dict] | dict) -> dict:
+    url = urljoin(settings.api.base_url, endpoint)
+    resp = httpx.post(
+        url=url, headers=settings.api.headers, content=json.dumps(data)
+    )
+    if resp.status_code != 201 and resp.status_code != 409:
+        resp.raise_for_status()
+    return resp.json()
 
 
-def get_categories_from_api() -> pd.FResp:
-    url = f'{settings.API_BASE_URL}/api/categories'
-    try:
-        resp = httpx.get(url=url, headers=HEADERS)
-        data = [pd.CategoryIn(**item) for item in resp.json()]
-        if not data:
-            return pd.FResp(data='No data')
-        return pd.FResp(ok=True, data=data)
-    except Exception as e:
-        return pd.FResp(data=e)
+def get_categories_from_api() -> list[pd.CategoryIn]:
+    url = urljoin(settings.api.base_url, '/api/categories')
+    resp = httpx.get(url=url, headers=settings.api.headers)
+    if not resp.status_code == 200:
+        resp.raise_for_status()
+
+    categories = [pd.CategoryIn(**item) for item in resp.json()]
+    return categories
 
 
 def find_and_send_categories_to_api():
     with UZTClient() as uzt:
-        url = f'{settings.BASE_URL}{settings.START_URL}'
+        url = urljoin(settings.target.base_url, settings.target.start_url)
         uzt.get(url=url)
         categories_on_page = get_categories_from_page(uzt)
-        if not categories_on_page:
-            return pd.FResp(data='No categories found on the page')
-        resp = send_data_to_api(
-            endpoint='/api/categories/create', data=categories_on_page.data
+        resp = save_data_to_api(
+            endpoint='/api/categories/create', data=categories_on_page
         )
         return resp
 
@@ -80,26 +79,26 @@ def get_categories() -> list[pd.CategoryIn]:
     can_try = 3
     categories = None
     while can_try:
-        check = get_categories_from_api()
-        if check:
-            categories = check.data
-            break
-        else:
-            with UZTClient() as uzt:
-                url = f'{settings.BASE_URL}{settings.START_URL}'
-                uzt.get(url=url)
-                categories_on_page = get_categories_from_page(uzt)
-                send_data_to_api(
-                    endpoint='/api/categories/create',
-                    data=categories_on_page.data,
-                )
-            can_try -= 1
-            if not can_try:
-                raise Exception(
-                    'Failed to retrieve categories neither from the database nor from the page'
-                )
 
-    return get_categories_slice(categories)
+        try:
+            categories = get_categories_from_api()
+        except httpx.HTTPStatusError as e:
+            logger.error(e)
+        else:
+            break
+
+        try:
+            categories = find_and_send_categories_to_api()
+        except httpx.ConnectTimeout as e:
+            logger.error(e)
+            can_try -= 1
+
+        if not can_try:
+            raise httpx.ConnectTimeout(
+                'Failed to retrieve categories neither from the database nor from the page'
+            )
+
+    return categories
 
 
 def get_categories_slice(categories):
@@ -128,7 +127,7 @@ def get_categories_slice(categories):
 def get_jobs(category: pd.CategoryIn):
     jobs_list = list()
     with UZTClient() as uzt:
-        url = f'{settings.BASE_URL}{settings.START_URL}'
+        url = urljoin(settings.target.base_url, settings.target.start_url)
         uzt.get(url=url)
         uzt.submit_asp_form(category.href)
         uzt.get(uzt.next_url)
@@ -179,33 +178,32 @@ def get_jobs(category: pd.CategoryIn):
 def main():
     try:
         categories = get_categories()
-    except httpx.ConnectError:
-        logger.info('No API connection.')
-        sys.exit()
-    try:
         for category in categories:
-            jobs_list: pd.FResp = get_jobs(category)
-            if jobs_list:
-                logger.info(
-                    f'{category.id}: "{category.name}" has {len(jobs_list.data)} jobs.'
-                )
+            try:
+                jobs_list = get_jobs(category)
+                if jobs_list:
+                    logger.info(
+                        f'{category.id}: "{category.name}" has {len(jobs_list.data)} jobs.'
+                    )
 
-                resp = send_data_to_api(
-                    f'/api/category/{category.id}/jobs/create', jobs_list.data
-                )
-
-                if resp and resp.data.status_code == 201:
-                    created_jobs = resp.data.json()
+                    created_jobs = save_data_to_api(
+                        f'/api/category/{category.id}/jobs/create',
+                        jobs_list.data,
+                    )
                     total = len(created_jobs)
                     logger.info(f'{total} new jobs were saved')
-
-                else:
-                    logger.info('No new data was saved')
-    except (UZTClient.AspInputsError, httpx.ConnectError) as e:
-        logger.info(f'ERROR --- {e}')
-    logger.info(
-        "Mission accomplished! Now I can have some fun, or rather, I'm going to sleep..."
-    )
+            except (
+                UZTClient.AspInputsError,
+                httpx.ConnectError,
+                httpx.ReadTimeout,
+            ) as e:
+                logger.error(e)
+                logger.info('No new data was saved')
+        logger.info(
+            "Mission accomplished! Now I can have some fun, or rather, I'm going to sleep..."
+        )
+    except (httpx.ConnectError, httpx.HTTPStatusError) as e:
+        log_error_and_exit(e)
 
 
 if __name__ == '__main__':

@@ -26,8 +26,7 @@ api = NinjaAPI(auth=ApiKeyAuth())
 # Manage Category ****************************************
 @api.get('/categories', response=list[scm.CategoryOut])
 def categories_list(request):
-    queryset = models.Category.objects.all()
-    return list(queryset)
+    return get_list_or_404(models.Category)
 
 
 @api.post(
@@ -70,8 +69,7 @@ def jobs_by_category(request, category_id: int):
 # Manage Subscribers **************************************
 @api.get('/subscribers', response=list[scm.SubscriberOut])
 def subscribers_list(request):
-    queryset = models.Subscriber.objects.all()
-    return queryset
+    return get_list_or_404(models.Subscriber)
 
 
 @api.get('/subscriber/create/{telegram_id}', response=scm.SubscriberOut)
