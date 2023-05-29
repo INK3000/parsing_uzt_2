@@ -1,3 +1,5 @@
+import secrets
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -73,3 +75,21 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'Telegram user:{self.subscriber.telegram_id} Category id: {self.category.name}'
+
+
+class Token(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    key = models.CharField(max_length=60, default='XXX' * 10)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'User: {self.user} Key: {self.key}'
+
+    @staticmethod
+    def generate_key():
+        return secrets.token_urlsafe(44)
+
+    def save(self, *args, **kwargs):
+        if self.key == 'XXX' * 10:
+            self.key = self.generate_key()
+        super().save(*args, **kwargs)

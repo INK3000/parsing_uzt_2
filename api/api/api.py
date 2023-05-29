@@ -16,7 +16,7 @@ class ApiKeyAuth(APIKeyHeader):
     param_name = 'X-API-Key'
 
     def authenticate(self, request, key):
-        if key == 'supersecret':
+        if models.Token.objects.filter(key=key).exists():
             return key
 
 

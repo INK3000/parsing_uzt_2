@@ -26,13 +26,13 @@ async def cmd_start(
     print(await state.get_state())
     if not subscriber:
         await message.answer(
-            text="The service is temporarily unavailable. Please try again in a few minutes"
+            text='The service is temporarily unavailable. Please try again in a few minutes'
         )
     else:
         commands = await bot.get_my_commands()
-        text = "\n".join(
+        text = '\n'.join(
             [
-                f"<b>/{command.command}</b>: {command.description}"
+                f'<b>/{command.command}</b>: {command.description}'
                 for command in commands
             ]
         )
@@ -45,7 +45,7 @@ async def cmd_show(
     """Show my subscriptions"""
     if not subscriber:
         await message.answer(
-            text=f"The service is temporarily unavailable. Please try again in a few minutes"
+            text=f'The service is temporarily unavailable. Please try again in a few minutes'
         )
     else:
         subscriptions = subscriber.subscriptions
@@ -61,12 +61,12 @@ async def cmd_add_subscriptions(
     """Add to my subscriptions"""
     if not subscriber:
         await message.answer(
-            text="The service is temporarily unavailable. Please try again in a few minutes"
+            text='The service is temporarily unavailable. Please try again in a few minutes'
         )
     else:
         await message.answer(
-            text="Select categories to add and then press <b>Complete</b>",
-            reply_markup=kb.get_subs_kbd(subscriber, categories, "add"),
+            text='Select categories to add and then press <b>Complete</b>',
+            reply_markup=kb.get_subs_kbd(subscriber, categories, 'add'),
         )
 
 
@@ -78,26 +78,17 @@ async def cmd_remove_subscriptions(
     """Remove from my subscriptions"""
     if not subscriber:
         await message.answer(
-            text="The service is temporarily unavailable. Please try again in a few minutes"
+            text='The service is temporarily unavailable. Please try again in a few minutes'
         )
     else:
         await message.answer(
-            text="Select categories to remove and then press <b>Complete</b>",
-            reply_markup=kb.get_subs_kbd(subscriber, categories, "remove"),
+            text='Select categories to remove and then press <b>Complete</b>',
+            reply_markup=kb.get_subs_kbd(subscriber, categories, 'remove'),
         )
 
 
-async def cmd_showinfo(message: types.Message, bot: Bot, state: FSMContext):
-    """
-    Do you want some info?
-    """
-    info = str(dir(state))
-    await message.answer(text=info)
-
-
 # register all handlers ========================================
-router.message.register(cmd_start, flt.Command("start"))
-router.message.register(cmd_show, flt.Command("show"))
-router.message.register(cmd_add_subscriptions, flt.Command("add"))
-router.message.register(cmd_remove_subscriptions, flt.Command("remove"))
-router.message.register(cmd_showinfo, flt.Command("showinfo"))
+router.message.register(cmd_start, flt.Command('start'))
+router.message.register(cmd_show, flt.Command('show'))
+router.message.register(cmd_add_subscriptions, flt.Command('add'))
+router.message.register(cmd_remove_subscriptions, flt.Command('remove'))
