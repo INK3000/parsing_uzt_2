@@ -17,7 +17,8 @@
 - API: Update subscriber - last_upd_date +
 - telebot: manage subscription: to_add, to_remove +
 - API:authorisation. create token +
-- **sendler: get users, get categories, get jobs**
+- sendler: get users, get categories, get jobs +
+- telebot: hide categories +
 - **sendler: filter only new jobs**
 - **telebot: utc time**
-- **telebot: hide categories**
+- **API: parameter "from" to jobs**

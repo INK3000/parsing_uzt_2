@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 
 class Job(BaseModel):
+    date_scraped: datetime.datetime
     date_from: str
     date_to: str
     title: str
