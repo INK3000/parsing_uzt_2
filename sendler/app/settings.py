@@ -11,10 +11,10 @@ class Endpoints:
 
 @dataclass
 class ApiSettings:
-    api_key: str
+    headers: dict
     categories: Endpoints
     jobs: Endpoints
-    users: Endpoints
+    subscribers: Endpoints
 
 
 @dataclass
@@ -30,18 +30,23 @@ class Settings:
 
 def get_settings():
     env = environs.Env()
-    env.read()
-    api_base_url = env.str('API-BASE-URL')
+    env.read_env()
+    api_base_url = env.str('API_BASE_URL')
 
     settings = Settings(
         bot=BotSettings(
-            base_url=f'https://api.telegram.org/bot{env.str("BOT-API-TOKEN")}'
+            base_url=f'https://api.telegram.org/bot{env.str("BOT_API_TOKEN")}'
         ),
         api=ApiSettings(
-            api_key=env.str('API-KEY'),
+            headers={
+                'accept': 'application/json',
+                'X-API-Key': env.str('API_KEY'),
+            },
             categories=Endpoints(get=urljoin(api_base_url, 'api/categories')),
             jobs=Endpoints(get=urljoin(api_base_url, 'api/category/{}/jobs')),
-            users=Endpoints(get=urljoin(api_base_url, 'api/subscribers')),
+            subscribers=Endpoints(
+                get=urljoin(api_base_url, 'api/subscribers')
+            ),
         ),
     )
     return settings

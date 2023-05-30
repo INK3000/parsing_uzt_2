@@ -23,16 +23,17 @@ class GetUsers(BaseMiddleware):
             url = settings.api.user.get.format(user_id)
             try:
                 response = httpx.get(url=url, headers=settings.api.headers)
-                if response.status_code == 200:
-                    return Subscriber(**response.json())
-            except httpx.ConnectError as e:
-                logger.error(f'Error to connection to {url}')
+                if response.status_code != 200:
+                    response.raise_for_status()
+                return Subscriber(**response.json())
+            except (httpx.ConnectError, httpx.HTTPStatusError) as e:
+                logger.error(e)
 
         def create_subscriber_for_api(user_id):
             # see .env file for endpoints
             url = settings.api.user.create.format(user_id)
             try:
-                response = httpx.get(url=url, haeders=settings.api.headers)
+                response = httpx.get(url=url, headers=settings.api.headers)
                 if response.status_code == 201:
                     return Subscriber(**response.json())
                 if response.status_code == 200 and response.json():

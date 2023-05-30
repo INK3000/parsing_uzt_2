@@ -19,3 +19,5 @@
 - API:authorisation. create token +
 - **sendler: get users, get categories, get jobs**
 - **sendler: filter only new jobs**
+- **telebot: utc time**
+- **telebot: hide categories**
