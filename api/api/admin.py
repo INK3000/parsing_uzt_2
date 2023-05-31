@@ -24,6 +24,7 @@ class JobAdmin(admin.ModelAdmin):
     ]
     list_filter = ['category']
     search_fields = ['place', 'title', 'company']
+    readonly_fields = ['date_scraped']
 
     def company_short(self, obj):
         ...

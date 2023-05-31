@@ -43,7 +43,9 @@ def get_settings():
                 'X-API-Key': env.str('API_KEY'),
             },
             categories=Endpoints(get=urljoin(api_base_url, 'api/categories')),
-            jobs=Endpoints(get=urljoin(api_base_url, 'api/category/{}/jobs')),
+            jobs=Endpoints(
+                get=urljoin(api_base_url, 'api/category/{}/jobs?from_date={}')
+            ),
             subscribers=Endpoints(
                 get=urljoin(api_base_url, 'api/subscribers')
             ),

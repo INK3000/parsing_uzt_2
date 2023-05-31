@@ -13,6 +13,9 @@ class Job(BaseModel):
     place: str
     url: str
 
+    def __str__(self):
+        return f'{self.title} {self.company}'
+
 
 class Category(BaseModel):
     id: int

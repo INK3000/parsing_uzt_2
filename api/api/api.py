@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 from django.core.serializers import serialize
@@ -61,8 +62,16 @@ def jobs_bulk_create(request, category_id: int, payload: list[scm.JobIn]):
 
 
 @api.get('category/{category_id}/jobs', response=list[scm.JobOut])
-def jobs_by_category(request, category_id: int):
-    queryset_list = get_list_or_404(models.Job, category=category_id)
+def jobs_by_category(
+    request, category_id: int, from_date: datetime | None = None
+):
+    if from_date:
+        print(from_date)
+        queryset_list = get_list_or_404(
+            models.Job, category=category_id, date_scraped__gte=from_date
+        )
+    else:
+        queryset_list = get_list_or_404(models.Job, category=category_id)
     return queryset_list
 
 
