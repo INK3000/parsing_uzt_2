@@ -36,8 +36,7 @@ def get_categories_from_page(client: UZTClient) -> list[dict]:
     return categories
 
 
-def save_data_to_api(endpoint: str, data: list[dict] | dict) -> dict:
-    url = urljoin(settings.api.base_url, endpoint)
+def save_data_to_api(url: str, data: list[dict] | dict) -> dict:
     resp = httpx.post(
         url=url, headers=settings.api.headers, content=json.dumps(data)
     )
@@ -47,7 +46,7 @@ def save_data_to_api(endpoint: str, data: list[dict] | dict) -> dict:
 
 
 def get_categories_from_api() -> list[pd.CategoryIn]:
-    url = urljoin(settings.api.base_url, '/api/categories')
+    url = settings.api.categories.get
     resp = httpx.get(url=url, headers=settings.api.headers)
     if not resp.status_code == 200:
         resp.raise_for_status()
@@ -62,7 +61,7 @@ def find_and_send_categories_to_api():
         uzt.get(url=url)
         categories_on_page = get_categories_from_page(uzt)
         resp = save_data_to_api(
-            endpoint='/api/categories/create', data=categories_on_page
+            url=settings.api.categories.create, data=categories_on_page
         )
         return resp
 
@@ -187,8 +186,8 @@ def main():
                     )
 
                     created_jobs = save_data_to_api(
-                        f'/api/category/{category.id}/jobs/create',
-                        jobs_list.data,
+                        url=settings.api.jobs.create.format(category.id),
+                        data=jobs_list.data,
                     )
                     total = len(created_jobs)
                     logger.info(f'{total} new jobs were saved')

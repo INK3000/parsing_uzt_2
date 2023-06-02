@@ -6,9 +6,17 @@ from environs import Env
 
 
 @dataclass
+class Urls:
+    get: str
+    create: str
+
+
+@dataclass
 class ApiSettings:
     base_url: str
     headers: dict
+    categories: Urls
+    jobs: Urls
 
 
 @dataclass
@@ -44,8 +52,9 @@ def get_settings():
         'accept': 'application/json',
         'X-API-Key': env.str('API_KEY'),
     }
+    api_base_url = env.str('API_BASE_URL')
 
-    target_headers = get_headers(env.str('UZT_HEADERS_PATH'))
+    target_headers = get_headers(env.str('TARGET_HEADERS_PATH'))
 
     settings = Settings(
         target=TargetSettings(
@@ -53,7 +62,20 @@ def get_settings():
             start_url=env.str('TARGET_START_URL'),
             headers=target_headers,
         ),
-        api=ApiSettings(base_url=env.str('API_BASE_URL'), headers=api_headers),
+        api=ApiSettings(
+            base_url=api_base_url,
+            headers=api_headers,
+            categories=Urls(
+                get=urljoin(api_base_url, env.str('CATEGORIES_GET_ENDPOINT')),
+                create=urljoin(
+                    api_base_url, env.str('CATEGORIES_CREATE_ENDPOINT')
+                ),
+            ),
+            jobs=Urls(
+                get=urljoin(api_base_url, env.str('JOBS_GET_ENDPOINT')),
+                create=urljoin(api_base_url, env.str('JOBS_CREATE_ENDPOINT')),
+            ),
+        ),
     )
 
     return settings

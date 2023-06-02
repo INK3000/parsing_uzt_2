@@ -63,7 +63,6 @@ class Subscription(models.Model):
     subscriber = models.ForeignKey(
         Subscriber, on_delete=models.CASCADE, related_name='subscriptions'
     )
-    date_last_sent = models.DateTimeField()
 
     class Meta:
         constraints = [

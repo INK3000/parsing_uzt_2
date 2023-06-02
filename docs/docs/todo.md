@@ -13,12 +13,16 @@
 - UZTScraper class +
 - Algorithm for webscraper (open startpage, get categories, walk all categories,
   scrap all pages, send data in every category to API for saving) +
+
+### Miscleanos
+
 - telebot: - get subscribers and create subscribers +
 - API: Update subscriber - last_upd_date +
 - telebot: manage subscription: to_add, to_remove +
 - API:authorisation. create token +
 - sendler: get users, get categories, get jobs +
 - telebot: hide categories +
-- **sendler: filter only new jobs**
-- **telebot: utc time**
-- **API: parameter "from" to jobs**
+- sendler: filter only new jobs +
+- API: parameter "from" to jobs +
+- sendler: to mail +
+- **API, Webscraper: remove unused fields **

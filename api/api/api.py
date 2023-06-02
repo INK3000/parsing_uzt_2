@@ -99,7 +99,7 @@ def subscriber_update(request, payload: scm.SubscriberUpdate):
     queryset = models.Subscription.objects.all().filter(subscriber=subscriber)
 
     # If there is an IntegrityError, we can restore all user subscriptions
-    old_data = subscriber.subscriptions.values('category_id', 'date_last_sent')
+    old_data = subscriber.subscriptions.values('category_id')
     old_subscriptions = [
         models.Subscription(subscriber=subscriber, **item) for item in old_data
     ]

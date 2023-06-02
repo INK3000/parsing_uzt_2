@@ -10,7 +10,7 @@ from . import models
 class CategoryOut(ModelSchema):
     class Config:
         model = models.Category
-        model_fields = "__all__"
+        model_fields = '__all__'
 
 
 class CategoryUpdate(Schema):
@@ -20,13 +20,12 @@ class CategoryUpdate(Schema):
 class CategoryIn(ModelSchema):
     class Config:
         model = models.Category
-        model_exclude = ["id"]
+        model_exclude = ['id']
 
 
 # schemas for Subscribers
 class SubscribedTo(Schema):
     category_id: int
-    date_last_sent: datetime.datetime
 
 
 class SubscriberOut(ModelSchema):
@@ -34,13 +33,13 @@ class SubscriberOut(ModelSchema):
 
     class Config:
         model = models.Subscriber
-        model_exclude = ["subscribed_to"]
+        model_exclude = ['subscribed_to']
 
 
 class SubscriberIn(ModelSchema):
     class Config:
         model = models.Subscriber
-        model_exclude = ["id", "date_created", "subscribed_to"]
+        model_exclude = ['id', 'date_created', 'subscribed_to']
 
 
 class SubscriberUpdate(ModelSchema):
@@ -48,7 +47,7 @@ class SubscriberUpdate(ModelSchema):
 
     class Config:
         model = models.Subscriber
-        model_exclude = ["id", "date_created", "subscribed_to"]
+        model_exclude = ['id', 'date_created', 'subscribed_to']
 
 
 # schema for some errors output
@@ -60,13 +59,13 @@ class Error(Schema):
 class JobOut(ModelSchema):
     class Config:
         model = models.Job
-        model_fields = "__all__"
+        model_fields = '__all__'
 
 
 class JobIn(ModelSchema):
     class Config:
         model = models.Job
-        model_exclude = ["id", "category", "date_scraped"]
+        model_exclude = ['id', 'category', 'date_scraped']
 
 
 class JobListIn(Schema):

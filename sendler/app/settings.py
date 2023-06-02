@@ -35,7 +35,7 @@ def get_settings():
 
     settings = Settings(
         bot=BotSettings(
-            base_url=f'https://api.telegram.org/bot{env.str("BOT_API_TOKEN")}'
+            base_url=f'https://api.telegram.org/bot{env.str("BOT_API_TOKEN")}/'
         ),
         api=ApiSettings(
             headers={

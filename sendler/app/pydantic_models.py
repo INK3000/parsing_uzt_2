@@ -29,9 +29,3 @@ class Subscription(BaseModel):
 class Subscriber(BaseModel):
     telegram_id: int
     subscriptions: list[Subscription | None]
-
-
-class SendlerData(BaseModel):
-    data: datetime.datetime
-    status: bool
-    details: str

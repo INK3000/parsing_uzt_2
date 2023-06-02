@@ -11,7 +11,6 @@ class SubscriberAdmin(admin.ModelAdmin):
     list_display = ['telegram_id', 'date_created']
     fields = ['telegram_id', 'date_created', 'subscribed_to']
     readonly_fields = ['telegram_id', 'date_created', 'subscribed_to']
-    # filter_horizontal = ["subscriptions"]
 
 
 class JobAdmin(admin.ModelAdmin):

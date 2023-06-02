@@ -44,9 +44,7 @@ async def add_subscription(
     categories: list[Category],
 ):
     category_id = int(callback.data.split('_')[-1])
-    subscriber.subscriptions.append(
-        Subscription(category_id=category_id, date_last_sent=datetime.utcnow())
-    )
+    subscriber.subscriptions.append(Subscription(category_id=category_id))
     await save_via_API(subscriber)
     await callback.answer()
 

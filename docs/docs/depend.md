@@ -29,3 +29,37 @@
 <https://https://docs.aiogram.dev/en/dev-3.x/index.html>
 
 `pip install -U --pre aiogram`
+
+---
+
+### Progressbar2
+
+<https://progressbar-2.readthedocs.io/en/latest/index.html>
+
+`pip install progressbar2`
+
+---
+
+### Selectolax
+
+<https://github.com/rushter/selectolax>
+
+`pip install selectolax`
+
+---
+
+### Pydantic
+
+<https://pypi.org/project/pydantic/>
+
+`pip install pydantic`
+
+---
+
+### Environs
+
+<https://pypi.org/project/environs/>
+
+`pip install environs`
+
+---
