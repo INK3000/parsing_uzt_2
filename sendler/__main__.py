@@ -6,9 +6,9 @@ from urllib.parse import quote_plus, urljoin
 
 import betterlogging as logging
 import httpx
-import progressbar
 import pytz
 from rich import print
+from rich.progress import track
 
 from sendler.app.pydantic_models import Category, Job, Subscriber
 from sendler.app.settings import settings
@@ -125,8 +125,8 @@ def mailing_all(
     text_by_category: dict[int, list[str]],
     categories: list[Category],
 ):
-    bar = progressbar.ProgressBar()
-    for subscriber in bar(subscribers):
+    # bar = progressbar.ProgressBar()
+    for subscriber in track(subscribers):
         for subscription in subscriber.subscriptions:
             if text_by_category.get(subscription.category_id):
                 category = next(

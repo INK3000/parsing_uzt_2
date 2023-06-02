@@ -32,14 +32,6 @@
 
 ---
 
-### Progressbar2
-
-<https://progressbar-2.readthedocs.io/en/latest/index.html>
-
-`pip install progressbar2`
-
----
-
 ### Selectolax
 
 <https://github.com/rushter/selectolax>
@@ -63,3 +55,9 @@
 `pip install environs`
 
 ---
+
+### Rich
+
+<>
+
+``
