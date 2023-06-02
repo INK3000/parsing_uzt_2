@@ -8,7 +8,6 @@ Full API sevice documentations /api/docs
 
 - GET: /api/categories
 - POST: /api/categories/create
-- POST: /api/category/update
 
 #### Job
 

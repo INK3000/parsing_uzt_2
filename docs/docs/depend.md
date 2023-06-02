@@ -58,6 +58,14 @@
 
 ### Rich
 
-<>
+<https://pypi.org/project/rich/13.4.1/>
 
-``
+`pip install rich==13.4.1`
+
+---
+
+### PyTZ
+
+<https://pypi.org/project/pytz/>
+
+`pip install pytz`

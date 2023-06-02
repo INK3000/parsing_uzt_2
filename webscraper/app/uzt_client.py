@@ -112,6 +112,9 @@ class UZTClient(httpx.Client):
 
     @property
     def asp_form_inputs(self):
+        """
+        returns current page's inputs for aspnetForm
+        """
         if self._asp_form_inputs:
             return self._asp_form_inputs
 
@@ -140,6 +143,9 @@ class UZTClient(httpx.Client):
 
     @property
     def next_url(self):
+        """
+        returns url to redirect if page has been redirected
+        """
         if not self.redirect_response:
             return False
         text = self.redirect_response.text

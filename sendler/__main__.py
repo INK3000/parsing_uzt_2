@@ -158,7 +158,7 @@ def main():
     print(
         f'Total subscribers {len(subscribers)}, jobs {sum(len(jobs) for jobs in jobs_by_category.values())} in {len(jobs_by_category)} categories'
     )
-    print('Start mailing...')
+    print('Start the mailing...')
     try:
         mailing_all(subscribers, text_by_category, categories)
     except Exception as e:
@@ -166,7 +166,7 @@ def main():
         sys.exit(1)
     else:
         save_state(path)
-    print('Mailing is done')
+    print('The mailing has been done')
 
 
 if __name__ == '__main__':

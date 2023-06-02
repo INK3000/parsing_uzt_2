@@ -7,6 +7,7 @@ import sys
 from urllib.parse import urljoin
 
 import httpx
+from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 
 from webscraper.app import custom_exception as ce
 from webscraper.app import pydantic_models as pd
@@ -40,7 +41,7 @@ def save_data_to_api(url: str, data: list[dict] | dict) -> dict:
     resp = httpx.post(
         url=url, headers=settings.api.headers, content=json.dumps(data)
     )
-    if resp.status_code != 201 and resp.status_code != 409:
+    if resp.status_code != 201:
         resp.raise_for_status()
     return resp.json()
 
@@ -68,9 +69,8 @@ def find_and_send_categories_to_api():
 
 def get_next_page_href(client: UZTClient):
     a = client.tree.css_first('table.Pager td:last-child a')
-    if not a:
-        return pd.FResp(data='There is not next page href')
-    return pd.FResp(ok=True, data=a.attrs.get('href'))
+    if a:
+        return a.attrs.get('href')
 
 
 def get_categories() -> list[pd.CategoryIn]:
@@ -123,6 +123,20 @@ def get_categories_slice(categories):
     return categories
 
 
+def get_jobs_total_count(uzt):
+    total_jobs = 0
+    try:
+        total_jobs_text = uzt.tree.css_first(
+            'tr#ctl00_MainArea_SearchResultsList_POGrid_ctl01.TopGridPager td table tbody tr td table tbody tr td span.GridView-RowCountText'
+        ).text()
+        if total_jobs_text:
+            total_jobs = int(total_jobs_text.split(':')[-1])
+    except:
+        ...
+
+    return total_jobs
+
+
 def get_jobs(category: pd.CategoryIn):
     jobs_list = list()
     with UZTClient() as uzt:
@@ -132,44 +146,65 @@ def get_jobs(category: pd.CategoryIn):
         uzt.get(uzt.next_url)
 
         # -------------- log
-        logger.info(f'{category.id}: "{category.name}" is in working')
 
-        while True:
-            table = uzt.tree.css_first(
-                '#ctl00_MainArea_SearchResultsList_POGrid'
+        total_jobs = get_jobs_total_count(uzt)
+        logger.info(
+            f'{category.id}: "{category.name}" total jobs: {total_jobs}'
+        )
+        with Progress(
+            SpinnerColumn(),
+            *Progress.get_default_columns(),
+            TimeElapsedColumn(),
+            transient=True,
+            auto_refresh=False,
+        ) as progress:
+
+            task = progress.add_task(
+                f'Geting jobs in {category.name}', total=total_jobs
             )
-            tr_list = table.css('tr:not(:nth-child(-n+2)):not(:last-child)')
-            for tr in tr_list:
-                cells = tr.css('td')
-                date_from, date_to, title, company, place = [
-                    item.text().strip() for item in tr.css('td')
-                ]
 
-                href = cells[2].css_first('a').attrs.get('href')
-                uzt.submit_asp_form(href, only_url=True)
+            while not progress.finished:
+                table = uzt.tree.css_first(
+                    '#ctl00_MainArea_SearchResultsList_POGrid'
+                )
+                tr_list = table.css(
+                    'tr:not(:nth-child(-n+2)):not(:last-child)'
+                )
+                for tr in tr_list:
+                    cells = tr.css('td')
+                    date_from, date_to, title, company, place = [
+                        item.text().strip() for item in tr.css('td')
+                    ]
 
-                long_url = uzt.next_url
-                try:
-                    match = re.search(r'(^.+aspx\?).+(itemID.+)$', long_url)
-                    short_url = match.group(1) + match.group(2)
+                    href = cells[2].css_first('a').attrs.get('href')
+                    uzt.submit_asp_form(href, only_url=True)
 
-                    job = pd.Job(
-                        date_from=date_from,
-                        date_to=date_to,
-                        title=title,
-                        company=company,
-                        place=place,
-                        url=short_url,
-                    )
+                    long_url = uzt.next_url
+                    try:
+                        match = re.search(
+                            r'(^.+aspx\?).+(itemID.+)$', long_url
+                        )
+                        short_url = match.group(1) + match.group(2)
 
-                    jobs_list.append(job.dict())
-                except TypeError as e:
-                    logger.error(e)
+                        job = pd.Job(
+                            date_from=date_from,
+                            date_to=date_to,
+                            title=title,
+                            company=company,
+                            place=place,
+                            url=short_url,
+                        )
 
-            next_page = get_next_page_href(uzt)
-            if not next_page:
-                break
-            uzt.submit_asp_form(next_page.data)
+                        jobs_list.append(job.dict())
+                        progress.update(task, advance=1)
+                        progress.refresh()
+                    except TypeError as e:
+                        logger.error(e)
+                next_page = get_next_page_href(uzt)
+                if not next_page:
+                    progress.update(task, completed=total_jobs)
+                    break
+                uzt.submit_asp_form(next_page)
 
     return pd.FResp(ok=True, data=jobs_list)
 
@@ -181,23 +216,23 @@ def main():
             try:
                 jobs_list = get_jobs(category)
                 if jobs_list:
-                    logger.info(
-                        f'{category.id}: "{category.name}" has {len(jobs_list.data)} jobs.'
-                    )
 
                     created_jobs = save_data_to_api(
                         url=settings.api.jobs.create.format(category.id),
                         data=jobs_list.data,
                     )
+                    print(created_jobs)
                     total = len(created_jobs)
                     logger.info(f'{total} new jobs were saved')
             except (
                 UZTClient.AspInputsError,
                 httpx.ConnectError,
                 httpx.ReadTimeout,
+                httpx.HTTPStatusError,
             ) as e:
-                logger.error(e)
-                logger.info('No new data was saved')
+                logger.info('No new jobs was saved')
+                if hasattr(e, 'response') and e.response.status_code != 409:
+                    logger.error(e)
         logger.info(
             "Mission accomplished! Now I can have some fun, or rather, I'm going to sleep..."
         )
