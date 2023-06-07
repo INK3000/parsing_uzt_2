@@ -21,7 +21,7 @@ logging.config.dictConfig(logger_settings)
 
 def log_error_and_exit(error):
     logger.error(error)
-    sys.exit()
+    sys.exit(1)
 
 
 def get_categories_from_page(client: UZTClient) -> list[dict]:
@@ -101,10 +101,14 @@ def get_categories() -> list[pd.CategoryIn]:
 
 
 def get_categories_slice(categories):
+    """
+    if script run with args
+    start and end are category.id
+
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('--start', type=int, help='From category id...')
     parser.add_argument('--end', type=int, help='To category id (iclusive)')
-    parser.add_argument('--marker', type=str, help='Marker for log')
 
     args = parser.parse_args()
     start = args.start
@@ -124,6 +128,9 @@ def get_categories_slice(categories):
 
 
 def get_jobs_total_count(uzt):
+    """
+    returns jobs values from table's header
+    """
     total_jobs = 0
     try:
         total_jobs_text = uzt.tree.css_first(
@@ -131,26 +138,32 @@ def get_jobs_total_count(uzt):
         ).text()
         if total_jobs_text:
             total_jobs = int(total_jobs_text.split(':')[-1])
-    except:
-        ...
+    except Exception as e:
+        logger.error(e)
 
     return total_jobs
 
 
-def get_jobs(category: pd.CategoryIn):
+def get_jobs(category: pd.CategoryIn) -> list[dict]:
+    """
+    return list of jobs
+
+    """
+
     jobs_list = list()
     with UZTClient() as uzt:
+        # open start url and go to te category page
         url = urljoin(settings.target.base_url, settings.target.start_url)
         uzt.get(url=url)
         uzt.submit_asp_form(category.href)
         uzt.get(uzt.next_url)
 
-        # -------------- log
-
+        # get amounts of jobs on all pages from data in the header of table
         total_jobs = get_jobs_total_count(uzt)
         logger.info(
             f'{category.id}: "{category.name}" total jobs: {total_jobs}'
         )
+        # create object for progress bar
         with Progress(
             SpinnerColumn(),
             *Progress.get_default_columns(),
@@ -163,13 +176,17 @@ def get_jobs(category: pd.CategoryIn):
                 f'Geting jobs in {category.name}', total=total_jobs
             )
 
-            while not progress.finished:
+            # start cycle for all pages in the categoty
+            while True:
+
+                # find all row tables, exclude first two (name of columns and e.t.c.)
                 table = uzt.tree.css_first(
                     '#ctl00_MainArea_SearchResultsList_POGrid'
                 )
                 tr_list = table.css(
                     'tr:not(:nth-child(-n+2)):not(:last-child)'
                 )
+                # get all data in cell for all rows
                 for tr in tr_list:
                     cells = tr.css('td')
                     date_from, date_to, title, company, place = [
@@ -177,14 +194,21 @@ def get_jobs(category: pd.CategoryIn):
                     ]
 
                     href = cells[2].css_first('a').attrs.get('href')
+
+                    # Obtain the static URL via event target
+                    # without navigating to the page;
+                    # only_url=True allows the client remains on the category page.
+
                     uzt.submit_asp_form(href, only_url=True)
 
+                    # get static url for job and short it
+                    # don't create job oject if there is no static url
                     long_url = uzt.next_url
                     try:
-                        match = re.search(
+                        re_match = re.search(
                             r'(^.+aspx\?).+(itemID.+)$', long_url
                         )
-                        short_url = match.group(1) + match.group(2)
+                        short_url = re_match.group(1) + re_match.group(2)
 
                         job = pd.Job(
                             date_from=date_from,
@@ -196,17 +220,24 @@ def get_jobs(category: pd.CategoryIn):
                         )
 
                         jobs_list.append(job.dict())
-                        progress.update(task, advance=1)
-                        progress.refresh()
                     except TypeError as e:
                         logger.error(e)
+
+                    finally:
+                        # update progress bar
+                        progress.update(task, advance=1)
+                        progress.refresh()
+
                 next_page = get_next_page_href(uzt)
                 if not next_page:
+                    # if no more pages, progress bar should be completed
                     progress.update(task, completed=total_jobs)
                     break
+
+                # else go to the next page
                 uzt.submit_asp_form(next_page)
 
-    return pd.FResp(ok=True, data=jobs_list)
+    return jobs_list
 
 
 def main():
@@ -219,9 +250,8 @@ def main():
 
                     created_jobs = save_data_to_api(
                         url=settings.api.jobs.create.format(category.id),
-                        data=jobs_list.data,
+                        data=jobs_list,
                     )
-                    print(created_jobs)
                     total = len(created_jobs)
                     logger.info(f'{total} new jobs were saved')
             except (
@@ -229,15 +259,20 @@ def main():
                 httpx.ConnectError,
                 httpx.ReadTimeout,
                 httpx.HTTPStatusError,
+                httpx.RemoteProtocolError,
             ) as e:
                 logger.info('No new jobs was saved')
-                if hasattr(e, 'response') and e.response.status_code != 409:
+                # don't show httpx.HTTPStatusError if status_code is 409
+                if not hasattr(e, 'response') or e.response.status_code != 409:
                     logger.error(e)
+
         logger.info(
             "Mission accomplished! Now I can have some fun, or rather, I'm going to sleep..."
         )
     except (httpx.ConnectError, httpx.HTTPStatusError) as e:
         log_error_and_exit(e)
+    except KeyboardInterrupt:
+        log_error_and_exit('Interrupted by user')
 
 
 if __name__ == '__main__':

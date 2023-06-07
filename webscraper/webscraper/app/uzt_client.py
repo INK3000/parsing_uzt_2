@@ -1,15 +1,3 @@
-# проверить есть ли в таблице катогории записи
-# если нет
-#   получить названия, ссылки, сформировать список, сериализовать и отправить запрос api на создание категорий
-#
-# получить список категорий из базы
-#
-# для каждой категории
-#  зайти в категорию, собрать вакансии на странице, добавить в список
-#  проверить, есть ли еще страницы в категории - если да, получить ссылку и перейти на следующую страницу, повторить цикл
-#  если больше страниц нет, сериализировать данные и отправить в API
-#
-#  получить id последнего добавленного элемента, отправить в api запрос на обновление категории
 import re
 from urllib.parse import unquote, urljoin
 
@@ -21,7 +9,7 @@ from webscraper.app.settings import settings
 
 class UZTClient(httpx.Client):
     """
-    The class extends the Client class and provides an additional feature:
+    The class extends the httpx.Client class and provides an additional feature:
     after loading a page using the GET method, you can follow URLs like:
     javascript:__doPostBack('ctl00$MainArea$GroupedPOSearchTab$ProffessionGroups$ctl00$ProfGroup',')
 
@@ -150,9 +138,9 @@ class UZTClient(httpx.Client):
             return False
         text = self.redirect_response.text
         pattern = re.compile(r'([^\|]+)\|$')
-        match = pattern.search(text)
-        if match:
-            right_url = unquote(match.group(1))
+        re_match = pattern.search(text)
+        if re_match:
+            right_url = unquote(re_match.group(1))
             next_url = urljoin(settings.target.base_url, right_url)
             return next_url
         return False
@@ -184,9 +172,9 @@ class UZTClient(httpx.Client):
     @staticmethod
     def get_event_target(href: str) -> str | bool:
         pattern = re.compile(r"\('(.+)',''\)")
-        match = pattern.search(href)
-        if match:
-            result = match.group(1)
+        re_match = pattern.search(href)
+        if re_match:
+            result = re_match.group(1)
             return result
         else:
             raise Exception(

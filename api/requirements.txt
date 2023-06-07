@@ -1,2 +1,4 @@
 Django==4.2
 django-ninja==0.21.0
+uvicorn==0.22.0
+environs==9.5.0

@@ -1,4 +1,9 @@
-# Welcome to project "Parsing portal.uzt.lt"
+# Scraping jobs from portal.uzt.lt
+
+The service enables the aggregation of job postings from the portal.uzt.lt, storing the gathered data in a database.
+This information is subsequently used to distribute notifications of new job vacancies on the site via a Telegram bot.
+
+Service consists of 4 parts: database with REST API, scraper, sender, and telegram bot.
 
 ## API service
 

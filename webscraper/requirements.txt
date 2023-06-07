@@ -1,3 +1,5 @@
 httpx==0.24.0
 pydantic==1.10.8
 environs==9.5.0
+rich==13.4.1
+selectolax==0.3.14

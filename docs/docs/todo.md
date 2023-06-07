@@ -26,8 +26,9 @@
 - API: parameter "from" to jobs +
 - sendler: to mail +
 - API, Webscraper: remove unused fields +
-- Docs: add all dependencies
-- **webscraper: custom error cause connection error in send_data_to_api, and handle it**
-- **Docs: add description of the project**
-- **Docs: update API endpoints**
-- **Docs: write manual to all services**
+- Docs: add all dependencies +
+- Docs: update API endpoints +
+- Docs: add description of the project
+- **Docs write manual to all services**
+- **Docker: create dockerfile for sendler service**
+- **Docker: create dockercompose and up services on local machine**
