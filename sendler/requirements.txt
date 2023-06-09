@@ -1,4 +1,6 @@
+httpx==0.24.0
 pytz==2023.3
 rich==13.3.5
 betterlogging==0.2.1
 environs==9.5.0
+pydantic==1.10.8

@@ -1,5 +1,8 @@
 FROM python:3.11-alpine
-ENV PYTHONUNBUFFERED 1
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
 WORKDIR /app
 
 RUN pip install pip --upgrade 
@@ -8,4 +11,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD [ "ginicorn", "parsing_uzt_2.asgi:application", "-k", "uvicorn.workers.UvicornWorker" ]
+# CMD [ "ginicorn", "parsing_uzt_2.asgi:application", "-k", "uvicorn.workers.UvicornWorker" ]

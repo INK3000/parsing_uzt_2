@@ -6,6 +6,6 @@ RUN pip install pip --upgrade
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY /sendler ./sendler
+COPY . ./sendler
 
 CMD [ "python", "-m", "sendler"]

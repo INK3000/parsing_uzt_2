@@ -6,6 +6,6 @@ RUN pip install pip --upgrade
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY /webscraper ./webscraper
+COPY . ./webscraper
 
 CMD [ "python", "-m", "webscraper"  ]

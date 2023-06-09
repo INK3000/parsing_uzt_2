@@ -4,14 +4,31 @@ services:
     build:
       context: ./api
     volumes:
-      - static_volume:/static
-    command: sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn parsing_uzt_2.asgi:application -k uvicorn.workers.UvicornWorker"
+      - static_volume:/app/static
+    command: sh -c "python manage.py collectstatic --no-input && gunicorn parsing_uzt_2.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
   nginx:
     build:
       context: ./nginx
     volumes:
-      - static_volume:/static
+      - static_volume:/var/www/html/static
     ports:
       - "80:80"
+    depends_on:
+      - api
+  telebot:
+    build:
+      context: ./telebot
+    depends_on:
+      - api
+  webscraper:
+    build:
+      context: ./webscraper
+    depends_on:
+      - api
+  sendler:
+    build:
+      context: ./sendler
+    depends_on:
+      - api
 volumes:
   static_volume:
