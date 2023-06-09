@@ -1,13 +1,10 @@
 from datetime import datetime
-from typing import Any
 
-from django.core.serializers import serialize
 from django.db.utils import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404, get_object_or_404
 from ninja import NinjaAPI
 from ninja.security import APIKeyHeader
-from pydantic.error_wrappers import ValidationError
 
 from . import models
 from . import schemas as scm
