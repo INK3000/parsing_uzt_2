@@ -7,7 +7,6 @@ from urllib.parse import quote_plus, urljoin
 import betterlogging as logging
 import httpx
 import pytz
-from rich import print
 from rich.progress import track
 
 from sendler.app.pydantic_models import Category, Job, Subscriber
@@ -15,7 +14,7 @@ from sendler.app.settings import settings
 
 # import logging
 logger = logging.getLogger('sendler')
-logging.basic_colorized_config(level=logging.ERROR)
+logging.basic_colorized_config(level=logging.INFO)
 
 
 def get_data_from_api(endpoint, data_class):
@@ -154,11 +153,11 @@ def main():
         sys.exit(1)
 
     text_by_category = get_text_by_category(jobs_by_category)
-    print('All data is prepared')
-    print(
+    logger.info('All data is prepared')
+    logger.info(
         f'Total subscribers {len(subscribers)}, jobs {sum(len(jobs) for jobs in jobs_by_category.values())} in {len(jobs_by_category)} categories'
     )
-    print('Start the mailing...')
+    logger.info('Start the mailing...')
     try:
         mailing_all(subscribers, text_by_category, categories)
     except Exception as e:
@@ -166,7 +165,7 @@ def main():
         sys.exit(1)
     else:
         save_state(path)
-    print('The mailing has been done')
+    logger.info('The mailing has been done')
 
 
 if __name__ == '__main__':

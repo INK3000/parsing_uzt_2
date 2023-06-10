@@ -134,7 +134,7 @@ def get_jobs_total_count(uzt):
     total_jobs = 0
     try:
         total_jobs_text = uzt.tree.css_first(
-            'tr#ctl00_MainArea_SearchResultsList_POGrid_ctl01.TopGridPager td table tbody tr td table tbody tr td span.GridView-RowCountText'
+            'tr.TopGridPager td table tbody tr td table tbody tr td span.GridView-RowCountText'
         ).text()
         if total_jobs_text:
             total_jobs = int(total_jobs_text.split(':')[-1])

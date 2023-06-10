@@ -1,3 +1,8 @@
+#
+# docker compose up --no-start
+# docker compose start api nginx telebot
+# cron shedule: docker compose start webscraper sendler
+#
 version: "3.9"
 services:
   api:
@@ -5,6 +10,8 @@ services:
       context: ./api
     volumes:
       - static_volume:/app/static
+      - db_volume:/app/db
+    restart: unless-stopped
     command: sh -c "python manage.py collectstatic --no-input && gunicorn parsing_uzt_2.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
   nginx:
     build:
@@ -15,20 +22,26 @@ services:
       - "80:80"
     depends_on:
       - api
+    restart: unless-stopped
   telebot:
     build:
       context: ./telebot
     depends_on:
       - api
+    restart: unless-stopped
+    command: sh -c "python -m telebot"
   webscraper:
     build:
       context: ./webscraper
     depends_on:
       - api
+    command: sh -c "python -m webscraper"
   sendler:
     build:
       context: ./sendler
     depends_on:
       - api
+    command: sh -c "python -m sendler"
 volumes:
   static_volume:
+  db_volume:
