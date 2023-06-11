@@ -140,8 +140,8 @@ def mailing_all(
 
 
 def main():
-    path = 'sendler/app/state.json'
 
+    path = settings.state_path
     last_succesful_mailing = get_last_successful_mailing(path)
 
     try:

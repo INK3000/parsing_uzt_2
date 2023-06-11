@@ -9,15 +9,14 @@ services:
     build:
       context: ./api
     volumes:
-      - static_volume:/app/static
-      - db_volume:/app/db
+      - storage_volume:/app/storage
     restart: unless-stopped
     command: sh -c "python manage.py collectstatic --no-input && gunicorn parsing_uzt_2.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
   nginx:
     build:
       context: ./nginx
     volumes:
-      - static_volume:/var/www/html/static
+      - storage_volume:/var/www/html/storage
     ports:
       - "80:80"
     depends_on:
@@ -39,9 +38,10 @@ services:
   sendler:
     build:
       context: ./sendler
+    volumes:
+      - storage_volume:/app/sendler/storage
     depends_on:
       - api
     command: sh -c "python -m sendler"
 volumes:
-  static_volume:
-  db_volume:
+  storage_volume:

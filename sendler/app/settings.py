@@ -26,6 +26,7 @@ class BotSettings:
 class Settings:
     bot: BotSettings
     api: ApiSettings
+    state_path: str
 
 
 def get_settings():
@@ -50,6 +51,7 @@ def get_settings():
                 get=urljoin(api_base_url, 'api/subscribers')
             ),
         ),
+        state_path=env.str('STATE_PATH'),
     )
     return settings
 
