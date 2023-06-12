@@ -9,8 +9,8 @@ import httpx
 import pytz
 from rich.progress import track
 
-from sendler.app.pydantic_models import Category, Job, Subscriber
-from sendler.app.settings import settings
+from .app.pydantic_models import Category, Job, Subscriber
+from .app.settings import settings
 
 # import logging
 logger = logging.getLogger('sendler')
@@ -143,7 +143,7 @@ def main():
 
     path = settings.state_path
     last_succesful_mailing = get_last_successful_mailing(path)
-
+    print(settings)
     try:
         subscribers = get_subscribers()
         categories = get_categories()

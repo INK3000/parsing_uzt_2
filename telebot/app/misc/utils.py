@@ -3,7 +3,6 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand
 
-from telebot.app import handlers
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +10,7 @@ logger = logging.getLogger(__name__)
 def get_handlers_list(handlers_module):
     handlers_list = []
     for handler_name in dir(handlers_module):
-        if handler_name[:2] == "h_":
+        if handler_name[:2] == 'h_':
             handler = getattr(handlers_module, handler_name)
             handlers_list.append(handler)
     return handlers_list
@@ -23,10 +22,10 @@ def get_commands(handlers_module) -> dict:
 
     for handler in handlers_list:
         for item_name in dir(handler):
-            if item_name[:4] == "cmd_":
+            if item_name[:4] == 'cmd_':
                 command = getattr(handler, item_name)
-                command_name = item_name.split("_")[1]
-                command_description = command.__doc__ or "No description"
+                command_name = item_name.split('_')[1]
+                command_description = command.__doc__ or 'No description'
 
                 commands[command_name] = command_description.strip()
     return commands

@@ -4,7 +4,7 @@ from urllib.parse import unquote, urljoin
 import httpx
 from selectolax.lexbor import LexborHTMLParser
 
-from webscraper.app.settings import settings
+from .settings import settings
 
 
 class UZTClient(httpx.Client):

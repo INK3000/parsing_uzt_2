@@ -31,5 +31,6 @@
 - Docs: add description of the project
 - Docker: create dockerfile for sendler and webscraper service +
 - Docker: network for services. Telebot and api +
-- **Docker: create dockercompose and up services on local machine**
-- **Docs write manual to all services**
+- Docker: create dockercompose and up services on local machine +
+- !Deploy: create EC2 instance
+- !Docs write manual to all services

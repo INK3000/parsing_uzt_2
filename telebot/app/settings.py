@@ -3,8 +3,6 @@ from urllib.parse import urljoin
 
 import environs
 
-from telebot.app import handlers
-
 
 @dataclass
 class Urls:

@@ -9,11 +9,11 @@ from urllib.parse import urljoin
 import httpx
 from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 
-from webscraper.app import custom_exception as ce
-from webscraper.app import pydantic_models as pd
-from webscraper.app.settings import settings
-from webscraper.app.uzt_client import UZTClient
-from webscraper.loggers.settings import settings as logger_settings
+from .app import custom_exception as ce
+from .app import pydantic_models as pd
+from .app.settings import settings
+from .app.uzt_client import UZTClient
+from .loggers.settings import settings as logger_settings
 
 logger = logging.getLogger(__name__)
 logging.config.dictConfig(logger_settings)

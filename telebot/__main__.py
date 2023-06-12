@@ -3,11 +3,11 @@ import asyncio
 import betterlogging as logging
 from aiogram import Bot, Dispatcher
 
-from telebot.app import handlers
-from telebot.app.middlewares.get_categories import GetCategories
-from telebot.app.middlewares.get_users import GetUsers
-from telebot.app.misc import utils
-from telebot.app.settings import settings
+from .app import handlers
+from .app.middlewares.get_categories import GetCategories
+from .app.middlewares.get_users import GetUsers
+from .app.misc import utils
+from .app.settings import settings
 
 # import logging
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ logging.basic_colorized_config(level=logging.INFO)
 
 
 async def main():
-    bot = Bot(token=settings.bot.token, parse_mode="HTML")
+    bot = Bot(token=settings.bot.token, parse_mode='HTML')
     dp = Dispatcher()
 
     dp.startup.register(utils.on_start_bot)
@@ -32,5 +32,5 @@ async def main():
     await dp.start_polling(bot, bot_commands=utils.get_commands(handlers))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     asyncio.run(main())

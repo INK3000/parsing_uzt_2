@@ -1,8 +1,8 @@
 from aiogram import types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from telebot.app.pyd_models.categories import Category
-from telebot.app.pyd_models.subscriber import Subscriber
+from ..pyd_models.categories import Category
+from ..pyd_models.subscriber import Subscriber
 
 
 def get_subs_kbd(

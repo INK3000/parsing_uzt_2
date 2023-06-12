@@ -4,8 +4,8 @@ from typing import Any
 import httpx
 from aiogram import BaseMiddleware
 
-from telebot.app.pyd_models.categories import Category
-from telebot.app.settings import settings
+from ..pyd_models.categories import Category
+from ..settings import settings
 
 logger = logging.getLogger(__name__)
 

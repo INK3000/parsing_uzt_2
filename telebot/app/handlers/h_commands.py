@@ -6,11 +6,11 @@ from aiogram import types
 from aiogram.fsm.context import FSMContext
 from rich import print
 
-from telebot.app.keyboards import subscriptions as kb
-from telebot.app.misc import functions as fn
-from telebot.app.misc.states import ManageSubscriptions
-from telebot.app.pyd_models.categories import Category
-from telebot.app.pyd_models.subscriber import Subscriber, Subscription
+from ..keyboards import subscriptions as kb
+from ..misc import functions as fn
+from ..misc.states import ManageSubscriptions
+from ..pyd_models.categories import Category
+from ..pyd_models.subscriber import Subscriber, Subscription
 
 logger = logging.getLogger(__name__)
 

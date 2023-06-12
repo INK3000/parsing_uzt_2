@@ -4,11 +4,11 @@ from datetime import datetime
 import httpx
 from aiogram import F, Router, types
 
-from telebot.app.handlers import h_commands
-from telebot.app.keyboards import subscriptions as kb
-from telebot.app.pyd_models.categories import Category
-from telebot.app.pyd_models.subscriber import Subscriber, Subscription
-from telebot.app.settings import settings
+from ..handlers import h_commands
+from ..keyboards import subscriptions as kb
+from ..pyd_models.categories import Category
+from ..pyd_models.subscriber import Subscriber, Subscription
+from ..settings import settings
 
 logger = logging.getLogger(__name__)
 
