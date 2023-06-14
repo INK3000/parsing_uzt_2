@@ -61,8 +61,9 @@ def get_state(path):
     return state
 
 
-def save_state(path):
-    data = {'last_succesful_mailing': datetime.now(pytz.utc).isoformat()}
+def save_state(timestamp_iso: str):
+    path = settings.state_path
+    data = {'last_succesful_mailing': timestamp_iso}
 
     try:
         with open(path, 'w') as file:
@@ -71,11 +72,11 @@ def save_state(path):
         logger.error(e)
 
 
-def get_last_successful_mailing(path: str):
+def get_last_successful_mailing():
 
     yesterday = datetime.now(pytz.utc) - timedelta(days=1)
 
-    state = get_state(path)
+    state = get_state(settings.state_path)
     last_succesful_mailing = state.get('last_succesful_mailing')
 
     if not last_succesful_mailing:
@@ -124,7 +125,6 @@ def mailing_all(
     text_by_category: dict[int, list[str]],
     categories: list[Category],
 ):
-    # bar = progressbar.ProgressBar()
     for subscriber in track(subscribers):
         for subscription in subscriber.subscriptions:
             if text_by_category.get(subscription.category_id):
@@ -140,10 +140,8 @@ def mailing_all(
 
 
 def main():
-
-    path = settings.state_path
-    last_succesful_mailing = get_last_successful_mailing(path)
-    print(settings)
+    timestamp_iso = datetime.now(pytz.utc).isoformat()
+    last_succesful_mailing = get_last_successful_mailing()
     try:
         subscribers = get_subscribers()
         categories = get_categories()
@@ -164,7 +162,7 @@ def main():
         logger.error(e)
         sys.exit(1)
     else:
-        save_state(path)
+        save_state(timestamp_iso)
     logger.info('The mailing has been done')
 
 

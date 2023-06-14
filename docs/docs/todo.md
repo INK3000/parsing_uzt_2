@@ -32,5 +32,5 @@
 - Docker: create dockerfile for sendler and webscraper service +
 - Docker: network for services. Telebot and api +
 - Docker: create dockercompose and up services on local machine +
-- !Deploy: create EC2 instance
+- Deploy: create EC2 instance +
 - !Docs write manual to all services
