@@ -1,8 +1,6 @@
 site_name: Parsing portal.uzt.lt
 dev_addr: 127.0.0.1:8001
 nav:
-  - About: about.md
   - Documentation: index.md
   - Dependencies: depend.md
-  - Todo: todo.md
 theme: readthedocs
