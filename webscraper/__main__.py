@@ -241,8 +241,10 @@ def get_jobs(category: pd.CategoryIn) -> list[dict]:
 
 
 def main():
+    logger.info('Starting scraper...')
     try:
         categories = get_categories()
+        logger.info(f'Total categories: {len(categories)}')
         for category in categories:
             try:
                 jobs_list = get_jobs(category)
@@ -261,7 +263,7 @@ def main():
                 httpx.HTTPStatusError,
                 httpx.RemoteProtocolError,
             ) as e:
-                logger.info('No new jobs was saved')
+                logger.info('No new jobs were saved')
                 # don't show httpx.HTTPStatusError if status_code is 409
                 if not hasattr(e, 'response') or e.response.status_code != 409:
                     logger.error(e)

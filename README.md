@@ -33,7 +33,6 @@ To implement this, I chose Django 4.2 as my framework. It offers a user-friendly
 
 At the present moment, the service has been tested locally and I'm planning to migrate it to AWS Cloud for further testing.
 
-
 # Scraping jobs from portal.uzt.lt
 
 The service enables the aggregation of job postings from the portal.uzt.lt, storing the gathered data in a database.
@@ -60,13 +59,14 @@ Please make sure to follow the configuration steps for each service as mentioned
 Rename file api/parsing_uzt_2/.env.dist to .env
 
 Inside .env replace DJANGO_SECRET_KEY with random string.
-  You can generate one with:
+You can generate one with:
 
 ```bash
 python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
 ```
 
 Navigate to the root directory of your project, parsing_uzt_2, and run the command:
+
 ```bash
 source docker-up-start
 ```
@@ -77,11 +77,13 @@ This will create containers for your services and automatically start the contai
 You need to create a superuser for the API service (which runs on Django) and obtain an API key to allow your services to interact with the API service.
 
 Therefore, after creating the containers and automatically starting some of them, you need to run some commands:
+
 ```bash
 docker exec -it parsing_uzt_2-api-1 sh
 ```
 
 In shell of the container, run:
+
 ```bash
 cd api
 python manage.py createsuperuser
@@ -117,7 +119,7 @@ Open the .env file using a text editor.
 
 Replace the placeholder values with your actual tokens:
 
-**BOT_TOKEN** -  Replace it with your Telegram bot token obtained from BotFather.
+**BOT_TOKEN** - Replace it with your Telegram bot token obtained from BotFather.
 
 **API_KEY** - Replace it with your API token obtained from the API service's admin panel (Look for the configuration section or settings related to API authentication).
 
@@ -125,8 +127,8 @@ Save the changes to the .env file.
 
 By providing the correct tokens, the telebot service will be able to authenticate with both the Telegram API and your API service.
 
-
 #### Webscraping
+
 To configure the webscraper, follow these steps:
 
 - Go to the parsing_uzt_2/webscraper/app directory.
@@ -134,7 +136,7 @@ To configure the webscraper, follow these steps:
 - Rename the .env.dist file to .env.
 
 - Open the .env file and update the following variables with the appropriate values:
-**API_KEY** - Replace it with your API token obtained from the API service's admin panel.
+  **API_KEY** - Replace it with your API token obtained from the API service's admin panel.
 
 - Save the changes to the .env file.
 
@@ -175,8 +177,8 @@ To configure the Sendler service, follow these steps:
 - Open the .env file.
 
 - Replace the placeholders for the API token and the bot token with the actual tokens you obtained earlier.
-Replace API_KEY with the API token obtained from the API service's admin panel.
-Replace BOT_API_TOKEN with the token obtained from BotFather for your Telegram bot.
+  Replace API_KEY with the API token obtained from the API service's admin panel.
+  Replace BOT_API_TOKEN with the token obtained from BotFather for your Telegram bot.
 
 - **Optionally,** if the API service is running on a different server or accessible at a different URL, you can update the API_BASE_URL variable with the appropriate base URL and port.
 
@@ -195,5 +197,3 @@ Add a new line to the file with the schedule and command to start the container.
 
 This example will start the container parsing_uzt_2-sendler-1 every 5 minutes. Adjust the schedule as per your requirements.
 Save the file and exit the editor.
-
-
