@@ -11,4 +11,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-# CMD [ "ginicorn", "parsing_uzt_2.asgi:application", "-k", "uvicorn.workers.UvicornWorker" ]
+CMD [ "gunicorn", "parsing_uzt_2.asgi:application", "-k", "uvicorn.workers.UvicornWorker" ]

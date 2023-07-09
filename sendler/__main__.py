@@ -89,18 +89,13 @@ def to_str_job(job: Job):
     return f'<a href="{job.url}">{job.title}</a> {job.company}'
 
 
-def get_text_chunks(jobs: list[Job]) -> list[str]:
-    start = 0
-    range = 20
-    text_chunks = []
-    while start < len(jobs):
+def get_chunks(lst: list, chunk_size: int):
+    return [lst[i : i + chunk_size] for i in range(0, len(lst), chunk_size)]
 
-        text_list = list(
-            [to_str_job(job) for job in jobs[start : start + range]]
-        )
-        joined_text = '\n'.join(text_list)
-        text_chunks.append(joined_text)
-        start = start + range
+
+def get_text_chunks(jobs: list[Job]) -> list[str]:
+    text_list = list([to_str_job(job) for job in jobs])
+    text_chunks = list('\n'.join(chunk) for chunk in get_chunks(text_list, 20))
     return text_chunks
 
 
