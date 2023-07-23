@@ -48,8 +48,7 @@ async def add_subscription(
     await save_via_API(subscriber)
     await callback.answer()
 
-    await callback.message.delete()
-    await callback.message.answer(
+    await callback.message.edit_text(
         text='Select categories to add and then press <b>Complete</b>',
         reply_markup=kb.get_subs_kbd(subscriber, categories, 'add'),
     )
@@ -71,8 +70,7 @@ async def remove_subscription(
     await save_via_API(subscriber)
     await callback.answer()
 
-    await callback.message.delete()
-    await callback.message.answer(
+    await callback.message.edit_text(
         text='Select categories to remove and then press <b>Complete</b>',
         reply_markup=kb.get_subs_kbd(subscriber, categories, 'remove'),
     )
