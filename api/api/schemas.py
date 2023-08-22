@@ -67,3 +67,9 @@ class JobIn(ModelSchema):
 
 class JobListIn(Schema):
     data: list[JobIn]
+
+
+class LastSuccessfulSendDetail(ModelSchema):
+    class Config:
+        model = models.LastSuccessfulSendDetail
+        model_exclude = ['id']

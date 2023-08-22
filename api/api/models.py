@@ -84,11 +84,17 @@ class Token(models.Model):
     def __str__(self):
         return f'User: {self.user} Key: {self.key}'
 
-    @staticmethod
-    def generate_key():
-        return secrets.token_urlsafe(44)
-
     def save(self, *args, **kwargs):
         if self.key == 'XXX' * 10:
             self.key = self.generate_key()
         super().save(*args, **kwargs)
+
+    @staticmethod
+    def generate_key():
+        return secrets.token_urlsafe(44)
+
+
+class LastSuccessfulSendDetail(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+
