@@ -38,8 +38,6 @@ services:
   sendler:
     build:
       context: ./sendler
-    volumes:
-      - storage_volume:/app/sendler/storage
     depends_on:
       - api
     command: sh -c "python -m sendler"

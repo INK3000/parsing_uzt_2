@@ -57,7 +57,7 @@ def get_settings():
                     api_base_url, 'api/last-successful-send'
                 ),
                 post=urljoin(
-                    api_base_url, 'api/last-successful-send'
+                    api_base_url, 'api/last-successful-send/create'
                 )
             )
 

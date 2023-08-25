@@ -131,12 +131,12 @@ def get_last_successful_send_timestamp(request):
         data = {'detail': 'There is no last successful send'}
         return JsonResponse(data=data, status=404)
 
-@api.post('last-successful-send/create', response=scm.LastSuccessfulSendDetail | scm.Error)
+@api.post('last-successful-send/create', response={201:scm.LastSuccessfulSendDetail, 409: scm.Error})
 def create_last_successful_send_timestamp(request):
     try:    
        record = models.LastSuccessfulSendDetail(timestamp=datetime.now())
        record.save()
-       return record
+       return 201, record
     except Exception as err:
        data = {'detail': f'{err}'}
-       return JsonResponse(data=data, status=409)
+       return 409, data

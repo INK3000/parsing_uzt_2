@@ -31,4 +31,4 @@ class Subscriber(BaseModel):
     subscriptions: list[Subscription | None]
 
 class LastSuccessfulSendDetail(BaseModel):
-    timestamp: datetime.datetime
+    timestamp: str
