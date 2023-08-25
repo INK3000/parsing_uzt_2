@@ -9,7 +9,12 @@ import httpx
 import pytz
 from rich.progress import track
 
-from .app.pydantic_models import Category, Job, Subscriber
+from .app.pydantic_models import (
+    Category,
+    Job,
+    Subscriber,
+    LastSuccessfulSendDetail,
+)
 from .app.settings import settings
 
 # import logging
@@ -21,8 +26,23 @@ def get_data_from_api(endpoint, data_class):
     data = list()
     resp = httpx.get(url=endpoint, headers=settings.api.headers)
     if resp.status_code == 200:
-        for item in resp.json():
-            data.append(data_class(**item))
+        if isinstance(resp.json(), list):
+            for item in resp.json():
+                data.append(data_class(**item))
+        else:
+            data.append(data_class(**resp.json()))
+    return data
+
+
+def post_data_to_api(endpoint, data_class, payload=None):
+    data = list()
+    resp = httpx.post(url=endpoint, headers=settings.api.headers, data=payload)
+    if resp.status_code == 201:
+        if isinstance(resp.json(), list):
+            for item in resp.json():
+                data.append(data_class(**item))
+        else:
+            data.append(data_class(**resp.json()))
     return data
 
 
@@ -41,7 +61,7 @@ def get_jobs(categories: list[Category], date) -> dict[int, list[Job]]:
     for category in categories:
         jobs = []
         jobs = get_data_from_api(
-            settings.api.jobs.get.format(category.id, quote_plus(date)), Job
+            settings.api.jobs.get.format(category.id, date), Job
         )
         if jobs:
             jobs_by_cat[category.id] = jobs
@@ -49,40 +69,39 @@ def get_jobs(categories: list[Category], date) -> dict[int, list[Job]]:
     return jobs_by_cat
 
 
-def get_state(path):
-    state = dict()
-    try:
-        with open(path, 'r') as file:
-            state = json.load(file)
-    except FileNotFoundError:
-        logger.error(f'File {path} not found')
-    except json.decoder.JSONDecodeError:
-        logger.info('File state.json is empty')
-    return state
+def get_last_successful_send_detail() -> list[LastSuccessfulSendDetail]:
+    data = get_data_from_api(
+        settings.api.last_successful_send_detail.get, LastSuccessfulSendDetail
+    )
+    return data
 
 
-def save_state(timestamp_iso: str):
-    path = settings.state_path
-    data = {'last_succesful_mailing': timestamp_iso}
+def create_last_successful_send_detail() -> list[LastSuccessfulSendDetail]:
+    data = post_data_to_api(
+        settings.api.last_successful_send_detail.post, LastSuccessfulSendDetail
+    )
+    return data
 
-    try:
-        with open(path, 'w') as file:
-            json.dump(data, file)
-    except Exception as e:
-        logger.error(e)
 
 
 def get_last_successful_mailing():
 
-    yesterday = datetime.now(pytz.utc) - timedelta(days=1)
-
-    state = get_state(settings.state_path)
-    last_succesful_mailing = state.get('last_succesful_mailing')
-
-    if not last_succesful_mailing:
+    last_successful_send_detail = get_last_successful_send_detail()
+    if last_successful_send_detail:
+        last_succesful_mailing = last_successful_send_detail[0].timestamp
+        print(last_succesful_mailing, 'from api')
+    else:
+        yesterday = datetime.now(pytz.utc) - timedelta(days=1)
         last_succesful_mailing = datetime.isoformat(yesterday)
-
+        print(last_succesful_mailing, 'from local')
+   
     return last_succesful_mailing
+
+
+def save_last_successful_mailing():
+    last_successful_send_detail = create_last_successful_send_detail()
+    if not last_successful_send_detail:
+        raise Exception("Last successful send detail has not been created")
 
 
 def to_str_job(job: Job):
@@ -135,7 +154,6 @@ def mailing_all(
 
 
 def main():
-    timestamp_iso = datetime.now(pytz.utc).isoformat()
     last_succesful_mailing = get_last_successful_mailing()
     try:
         subscribers = get_subscribers()
@@ -157,7 +175,11 @@ def main():
         logger.error(e)
         sys.exit(1)
     else:
-        save_state(timestamp_iso)
+        try:
+            save_last_successful_mailing() 
+        except Exception as e:
+            logger.error(e)
+            sys.exit(1)
     logger.info('The mailing has been done')
 
 

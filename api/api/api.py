@@ -120,3 +120,23 @@ def subscriber_update(request, payload: scm.SubscriberUpdate):
 def get_subscriber(request, telegram_id: int):
     subscriber = get_object_or_404(models.Subscriber, telegram_id=telegram_id)
     return subscriber
+
+
+# Manage Last Successful Send detail **************************************
+@api.get('last-successful-send', response=scm.LastSuccessfulSendDetail | scm.Error)
+def get_last_successful_send_timestamp(request):
+    try:
+        return models.LastSuccessfulSendDetail.objects.latest('id')
+    except models.LastSuccessfulSendDetail.DoesNotExist:
+        data = {'detail': 'There is no last successful send'}
+        return JsonResponse(data=data, status=404)
+
+@api.post('last-successful-send/create', response={201:scm.LastSuccessfulSendDetail, 409: scm.Error})
+def create_last_successful_send_timestamp(request):
+    try:    
+       record = models.LastSuccessfulSendDetail(timestamp=datetime.now())
+       record.save()
+       return 201, record
+    except Exception as err:
+       data = {'detail': f'{err}'}
+       return 409, data
