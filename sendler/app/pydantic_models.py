@@ -29,3 +29,6 @@ class Subscription(BaseModel):
 class Subscriber(BaseModel):
     telegram_id: int
     subscriptions: list[Subscription | None]
+
+class LastSuccessfulSendDetail(BaseModel):
+    timestamp: datetime.datetime

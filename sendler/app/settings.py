@@ -5,16 +5,18 @@ import environs
 
 
 @dataclass
-class Endpoints:
+class Endpoint:
     get: str
+    post: str | None = None
 
 
 @dataclass
 class ApiSettings:
     headers: dict
-    categories: Endpoints
-    jobs: Endpoints
-    subscribers: Endpoints
+    categories: Endpoint
+    jobs: Endpoint
+    subscribers: Endpoint
+    last_successful_send_detail: Endpoint
 
 
 @dataclass
@@ -43,13 +45,22 @@ def get_settings():
                 'accept': 'application/json',
                 'X-API-Key': env.str('API_KEY'),
             },
-            categories=Endpoints(get=urljoin(api_base_url, 'api/categories')),
-            jobs=Endpoints(
+            categories=Endpoint(get=urljoin(api_base_url, 'api/categories')),
+            jobs=Endpoint(
                 get=urljoin(api_base_url, 'api/category/{}/jobs?from_date={}')
             ),
-            subscribers=Endpoints(
+            subscribers=Endpoint(
                 get=urljoin(api_base_url, 'api/subscribers')
             ),
+            last_successful_send_detail=Endpoint(
+                get=urljoin(
+                    api_base_url, 'api/last_successful_send_detail'
+                ),
+                post=urljoin(
+                    api_base_url, 'api/last_successful_send_detail'
+                )
+            )
+
         ),
         state_path=env.str('STATE_PATH'),
     )
