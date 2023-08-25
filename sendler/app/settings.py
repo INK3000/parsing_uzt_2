@@ -54,10 +54,10 @@ def get_settings():
             ),
             last_successful_send_detail=Endpoint(
                 get=urljoin(
-                    api_base_url, 'api/last_successful_send_detail'
+                    api_base_url, 'api/last-successful-send'
                 ),
                 post=urljoin(
-                    api_base_url, 'api/last_successful_send_detail'
+                    api_base_url, 'api/last-successful-send'
                 )
             )
 

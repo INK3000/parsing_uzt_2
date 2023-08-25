@@ -26,8 +26,11 @@ def get_data_from_api(endpoint, data_class):
     data = list()
     resp = httpx.get(url=endpoint, headers=settings.api.headers)
     if resp.status_code == 200:
-        for item in resp.json():
-            data.append(data_class(**item))
+        if isinstance(resp.json(), list):
+            for item in resp.json():
+                data.append(data_class(**item))
+        else:
+            data.append(data_class(**resp.json()))
     return data
 
 
@@ -55,7 +58,7 @@ def get_jobs(categories: list[Category], date) -> dict[int, list[Job]]:
     for category in categories:
         jobs = []
         jobs = get_data_from_api(
-            settings.api.jobs.get.format(category.id, quote_plus(date)), Job
+            settings.api.jobs.get.format(category.id, date), Job
         )
         if jobs:
             jobs_by_cat[category.id] = jobs
@@ -86,6 +89,7 @@ def get_last_successful_mailing():
     else:
         yesterday = datetime.now(pytz.utc) - timedelta(days=1)
         last_succesful_mailing = datetime.isoformat(yesterday)
+    
     return last_succesful_mailing
 
 
@@ -146,6 +150,7 @@ def mailing_all(
 
 def main():
     last_succesful_mailing = get_last_successful_mailing()
+    print(quote_plus(last_succesful_mailing))
     try:
         subscribers = get_subscribers()
         categories = get_categories()
@@ -166,6 +171,7 @@ def main():
         logger.error(e)
         sys.exit(1)
     else:
+        save_last_successful_mailing() 
         try:
             save_last_successful_mailing() 
         except Exception as e:
