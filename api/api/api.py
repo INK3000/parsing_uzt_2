@@ -93,6 +93,8 @@ def subscriber_create(request, telegram_id: int):
 def subscriber_update(request, payload: scm.SubscriberUpdate):
     telegram_id = payload.telegram_id
     subscriber = get_object_or_404(models.Subscriber, telegram_id=telegram_id)
+    # TODO: it can be made simpler here. without old_data, delete and bulk_create 
+    # subscriber.subscribed_to.set(payload.subscriptions) subscriptions: list[int]
     queryset = models.Subscription.objects.all().filter(subscriber=subscriber)
 
     # If there is an IntegrityError, we can restore all user subscriptions
