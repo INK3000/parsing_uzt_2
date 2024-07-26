@@ -45,7 +45,7 @@ Service consists of 4 parts: database with REST API, scraper, sender, and telegr
 Clone the project from GitHub:
 
 ```bash
-git clone https://github.com/judecabra/parsing_uzt_2.git
+git clone https://github.com/INK3000/parsing_uzt_2.git
 ```
 
 After cloning the repository, it is important to perform the configuration of all the services before proceeding. Once the configuration is completed, you can run the command source docker-up-start from the root folder of the project. This command will restart all the containers with the updated configurations.
